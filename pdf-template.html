@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title><?= title ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm; /* ระยะขอบกระดาษ */
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            font-size: 10pt; 
+            line-height: 1.4;
+            margin: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            
+            /* [ใหม่] เพิ่มช่องว่างด้านล่างสุดของ "เนื้อหา" */
+            /* เพื่อไม่ให้ตารางแถวสุดท้ายไปทับกับ footer */
+            padding-bottom: 2cm; 
+        }
+        .header { 
+            text-align: center;
+            margin-bottom: 20px; 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 15px; 
+        }
+        .header-logo {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 10px;
+        }
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .header-titles {
+            text-align: center;
+        }
+        .header h1 { 
+            margin: 0; 
+            color: #000; 
+            font-size: 15pt;
+            font-weight: 600; 
+        }
+        .header h2 { 
+            margin: 5px 0 0 0; 
+            color: #222;
+            font-size: 13pt;
+            font-weight: 400; 
+        }
+        .header h3 { 
+            margin: 5px 0 0 0;
+            color: #000;
+            font-size: 13pt;
+            font-weight: 600; 
+        }
+        .info {
+            text-align: right;
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 9pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed; 
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+            word-break: break-word; 
+            font-size: 9pt;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #212529;
+            font-weight: 600;
+            text-align: center;
+            font-size: 10pt;
+        }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        
+        /* [แก้ไข] ส่วน Footer (วิธีใหม่ที่แน่นอนกว่า) */
+        #page-footer {
+            /* 1. บังคับให้อยู่ตำแหน่งคงที่ */
+            position: fixed; 
+            
+            /* 2. ยึดไว้ที่ด้านล่าง, ชิดขอบซ้าย/ขวา ของ "พื้นที่พิมพ์ได้" */
+            bottom: 0; 
+            left: 0;
+            right: 0;
+            
+            /* 3. สไตล์เดิม (เหมือนครั้งก่อน) */
+            text-align: center; 
+            color: #999;
+            font-size: 9pt; 
+            border-top: 1px solid #eee; 
+            padding-top: 10px; 
+            
+            /* 4. [สำคัญ] เพิ่ม padding ด้านล่างให้ตัวมันเอง */
+            /* เพื่อให้มันลอยขึ้นมาจากขอบกระดาษเล็กน้อย */
+            padding-bottom: 5px;
+            
+            /* 5. ตั้งพื้นหลังเป็นสีขาว กันตัวหนังสือทับซ้อน */
+            background-color: #ffffff;
+        }
+        /* === (จบส่วน Footer) === */
+
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+        
+        .report-group {
+            page-break-inside: avoid !important;
+            margin-bottom: 25px;
+        }
+        .report-group-title {
+            font-size: 14pt; 
+            color: #1f2937; 
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px; 
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        @media print {
+            body { margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="page-footer">
+        สร้างโดย <?= systemTitle ?> | พัฒนาระบบโดย ครูอานนท์ เมืองแก้ว
+    </div>
+
+    <div id="page-content">
+
+        <div class="header">
+            <div class="header-logo">
+                <img src="https://img5.pic.in.th/file/secure-sv1/-205c460e57efb3b52b.png" alt="Logo">
+            </div>
+            <div class="header-titles">
+                <h1><?= systemTitle ?></h1>
+                <h2>กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี</h2>
+                <h3><?= title ?></h3>
+            </div>
+        </div>
+        
+        <div class="info">
+            วันที่พิมพ์: <?= new Date().toLocaleString('th-TH') ?> | 
+            จำนวนรายการ: <?= data.length ?> รายการ
+        </div>
+        
+        <? if (data && data.length > 0 && headers) { ?>
+            
+            <? if (title === 'รายงานการยืม-คืน') { ?>
+                <?
+                let currentUser = null;
+                const headerList = headers;
+                let itemCounter = 1; 
+                ?>
+
+                <? data.forEach((row) => { ?>
+                
+                    <? if (row['ผู้ยืม'] !== currentUser) { ?>
+                        <? currentUser = row['ผู้ยืม']; ?>
+                        <? itemCounter = 1; ?>
+                        
+                        <? if (currentUser !== data[0]['ผู้ยืม']) { ?>
+                                    </tbody>
+                                </table>
+                            </div> 
+                        <? } ?>
+
+                        <div class="report-group">
+                            <h3 class="report-group-title">👨‍🏫 รายงานสำหรับ: <?= currentUser ?></h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%; text-align: center;">ลำดับ</th>
+                                        <th style="width: 20%;"><?= headerList[1] // รายการ ?></th>
+                                        <th style="width: 10%; text-align: center;"><?= headerList[2] // ประเภท ?></th>
+                                        <th style="width: 8%; text-align: center;"><?= headerList[3] // จำนวน ?></th>
+                                        <th style="width: 15%;"><?= headerList[4] // ห้อง ?></th>
+                                        <th style="width: 15%; text-align: center;"><?= headerList[5] // วันที่ยืม ?></th>
+                                        <th style="width: 15%; text-align: center;"><?= headerList[6] // วันที่คืน ?></th>
+                                        <th style="width: 12%; text-align: center;"><?= headerList[7] // สถานะ ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    <? } ?>
+                    
+                    <tr>
+                        <td style="text-align: center;"><?= itemCounter++ ?></td>
+                        <td><?= row[headerList[1]] ?></td>
+                        <td style="text-align: center;"><?= row[headerList[2]] ?></td>
+                        <td style="text-align: center;"><?= row[headerList[3]] ?></td>
+                        <td><?= row[headerList[4]] ?></td>
+                        <td style="text-align: center;"><?= row[headerList[5]] ?></td>
+                        <td style="text-align: center;"><?= row[headerList[6]] ?></td>
+                        <td style="text-align: center;"><?= row[headerList[7]] ?></td>
+                    </tr>
+
+                <? }); ?>
+                
+                            </tbody>
+                        </table>
+                    </div> 
+
+            <? } else { ?>
+                <?
+                const headerList = headers;
+                
+                function getHeaderStyle(header) {
+                    let style = '';
+                    switch (header) {
+                        case 'ชื่อสารเคมี': case 'ชื่ออุปกรณ์': style = 'width: 35%;'; break; 
+                        case 'สถานที่เก็บ': style = 'width: 15%;'; break; 
+                        case 'สูตรเคมี': style = 'width: 12%;'; break; 
+                        case 'ควรสั่งเพิ่ม (อย่างน้อย)': style = 'width: 10%; text-align: center;'; break;
+                        case 'จำนวนคงเหลือ': case 'สต็อกขั้นต่ำ': case 'สถานะ': style = 'width: 6%; text-align: center;'; break; 
+                        case 'หน่วย': style = 'width: 4%; text-align: center;'; break; 
+                    }
+                    return style ? `style="${style}"` : '';
+                }
+
+                function getCellStyle(header) {
+                    let style = '';
+                    switch (header) {
+                        case 'ควรสั่งเพิ่ม (อย่างน้อย)': case 'จำนวนคงเหลือ': case 'สต็อกขั้นต่ำ':
+                        case 'สถานะ': case 'หน่วย': case 'สูตรเคมี':
+                            style = 'text-align: center;'; break;
+                    }
+                    return style ? `style="${style}"` : '';
+                }
+                ?>
+            
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 4%; text-align: center;">ลำดับ</th> 
+                            <? headerList.forEach(header => { ?>
+                                <th <?= getHeaderStyle(header) ?>><?= header ?></th>
+                            <? }); ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <? data.forEach((row, index) => { ?>
+                            <tr>
+                                <td style="text-align: center;"><?= index + 1 ?></td>
+                                <? headerList.forEach(header => { ?>
+                                    <td <?= getCellStyle(header) ?>><?= row[header] ?></td>
+                                <? }); ?>
+                            </tr>
+                        <? }); ?>
+                    </tbody>
+                </table>
+            <? } ?>
+        
+        <? } else { ?>
+            <div class="no-data">ไม่มีข้อมูลสำหรับแสดงผล</div>
+        <? } ?>
+
+    </div> </body>
+</html>
