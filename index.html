@@ -6,7 +6,6 @@
   <title>SmartLab Chemical Inventory System</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
-        /* CSS เดิมทั้งหมด (ย่อไว้เพื่อความกระชับ) */
         body { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); min-height: 100%; line-height: 1.6; }
         * { box-sizing: border-box; }
         .container { max-width: 1200px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; min-height: 96vh; }
@@ -127,80 +126,31 @@
         .report-group-details .table-container { box-shadow: none; border: none; border-radius: 0; }
         .report-group-details table th { background: #f0f9ff; color: #0c4a6e; }
         .page-footer { text-align: center; padding: 24px 0; margin-top: auto; color: #718096; font-size: 13px; font-weight: 500; border-top: 1px solid #cbd5e1; background-color: #f8fafc; border-radius: 12px; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
-  /* สไตล์สำหรับปุ่มออกจากระบบเมื่อเอาเมาส์ชี้ */
-.btn-logout {
-    transition: all 0.3s ease;
-}
+        
+        /* ✅ สไตล์สำหรับปุ่มออกจากระบบ (สีแดงเมื่อชี้) */
+        .btn-logout { transition: all 0.3s ease; }
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+            color: white !important;
+            border: 1px solid #dc2626 !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            transform: translateY(-1px);
+        }
 
-.btn-logout:hover {
-    /* เปลี่ยนเป็นสีแดงไล่เฉดสวยๆ */
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-    color: white !important;
-    border: 1px solid #dc2626 !important;
-    /* เพิ่มเงาสีแดงฟุ้งๆ */
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-    transform: translateY(-1px);
-}
-   /* === CSS สำหรับ Welcome Toast === */
-.welcome-toast {
-    position: fixed;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-150%); /* ซ่อนไว้ข้างบนก่อน */
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 12px 28px 12px 20px;
-    border-radius: 50px; /* ทรงแคปซูลสวยๆ */
-    box-shadow: 
-        0 10px 40px rgba(0,0,0,0.1), 
-        0 0 0 1px rgba(255,255,255,0.6);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    z-index: 9999;
-    opacity: 0;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* เอฟเฟกต์เด้งดึ๋ง */
-    min-width: 300px;
-}
-
-.welcome-toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
-.welcome-icon-circle {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    color: white;
-    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
-}
-
-.welcome-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.welcome-title {
-    font-family: 'Sarabun', sans-serif;
-    font-size: 14px;
-    color: #64748b;
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-
-.welcome-name {
-    font-family: 'Sarabun', sans-serif;
-    font-size: 16px;
-    color: #1e293b;
-    font-weight: 700;
-}
+        /* ✅ สไตล์สำหรับ Welcome Toast */
+        .welcome-toast {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-150%);
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            padding: 12px 28px 12px 20px; border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.6);
+            display: flex; align-items: center; gap: 16px; z-index: 9999;
+            opacity: 0; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); min-width: 300px;
+        }
+        .welcome-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .welcome-icon-circle { width: 44px; height: 44px; background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4); }
+        .welcome-content { display: flex; flex-direction: column; }
+        .welcome-title { font-family: 'Sarabun', sans-serif; font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 2px; }
+        .welcome-name { font-family: 'Sarabun', sans-serif; font-size: 16px; color: #1e293b; font-weight: 700; }
   </style>
 
   <style>@view-transition { navigation: auto; }</style>
@@ -212,21 +162,14 @@
   // [IMPORTANT] ใส่ URL Web App ของคุณที่นี่
   const API_URL = "https://script.google.com/macros/s/AKfycbxXd30mi6wPOKskw8A-yuUCwRf6YybXhqYdOotTg_i2Y5DhRvI7ZY-t3X7dMD_tCtkjUw/exec";
 
-  // --- API HELPER (Replacement for google.script.run) ---
   async function callApi(action, payload = {}) {
     try {
       const response = await fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({ action: action, data: payload }),
-        headers: { "Content-Type": "text/plain;charset=utf-8" }, // ใช้ text/plain เพื่อเลี่ยง CORS ของ Google
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
       });
-      
-      const result = await response.json();
-      
-      // กรณี Login และ Sync โค้ดเก่าอาจจะ return format ไม่เหมือนกัน
-      // เราปรับให้เป็นมาตรฐานที่นี่ได้ถ้าจำเป็น แต่ใน Code.gs เราแก้ให้ส่ง JSON ปกติแล้ว
-      return result;
-
+      return await response.json();
     } catch (error) {
       console.error("API Error:", error);
       throw error;
@@ -257,24 +200,21 @@
     console.log('App initializing...');
     appElement = document.getElementById('app');
     
-    // 1. ลองดึงข้อมูลจาก LocalStorage (ความจำในเครื่อง) ก่อน
+    // 1. ลองดึงข้อมูลจาก LocalStorage ก่อน
     const cachedData = localStorage.getItem('smartlab_local_data');
     
     if (cachedData) {
-      // A. ถ้ามีของเดิม: โหลดทันที ไม่ต้องรอ!
       try {
         allData = JSON.parse(cachedData);
         console.log('Loaded from Cache:', allData.length);
         initializeDefaultAdmin(); // แสดงหน้า Login ทันที
         
-        // แอบ Sync ข้อมูลล่าสุดอยู่ข้างหลัง (Background Sync)
+        // แอบ Sync ข้อมูลล่าสุดอยู่ข้างหลัง
         callApi('sync')
           .then(response => {
             if (response.success && response.data) {
-              console.log('Background Sync Complete');
               allData = response.data;
               localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
-              // ถ้าหน้าปัจจุบันเป็น Dashboard (ไม่ใช่ Login) ให้รีเฟรชข้อมูลที่แสดง
               if (currentView !== 'login') {
                 renderDashboard();
               }
@@ -283,38 +223,31 @@
           .catch(err => console.warn('Background sync failed:', err));
           
       } catch (e) {
-        console.error('Cache parsing error', e);
-        localStorage.removeItem('smartlab_local_data'); // ลบ cache ที่เสีย
-        startFreshSync(); // โหลดใหม่แบบปกติ
+        localStorage.removeItem('smartlab_local_data');
+        startFreshSync();
       }
     } else {
-      // B. ถ้าเข้าครั้งแรกเลย: ต้องแสดง Loading
       startFreshSync();
     }
   }
 
   function startFreshSync() {
     appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังเชื่อมต่อเซิร์ฟเวอร์...</h2></div></div>`;
-    callApi('sync')
-      .then(onSyncSuccess)
-      .catch(onFailure);
+    callApi('sync').then(onSyncSuccess).catch(onFailure);
   }
 
   function onSyncSuccess(response) {
     if (response.success && response.data) {
       allData = response.data;
       console.log('Data Synced:', allData.length);
-      
-      // [สำคัญ] บันทึกลงเครื่องไว้ใช้คราวหน้า
       localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
-      
       initializeDefaultAdmin();
     } else {
       onFailure(new Error('Failed to sync data or no data returned.'));
     }
   }
-
   
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการ สร้าง/แก้ไข/ลบ
   function onCrudSuccess(response) {
     if (!response.success) {
       const specificError = response.message || 'CRUD operation failed';
@@ -323,25 +256,20 @@
       return;
     }
     
-    console.log('✅ Update Success:', response.action);
+    console.log('✅ CRUD Success:', response.action);
     
-    // อัพเดทข้อมูลใน allData (Memory)
     if (response.action === 'create') {
-      // ถ้าสร้างใหม่ ให้ใส่เข้าไปเลย
       allData.push(response.data);
     } 
     else if (response.action === 'update') {
-      // 🟢 [จุดสำคัญ] ค้นหาไอเท็มที่จะอัพเดท โดยเช็คทั้ง __backendId และ id
+      // ค้นหาแบบละเอียด (เช็คทั้ง backendId และ id)
       const index = allData.findIndex(i => 
         (i.__backendId && response.data.__backendId && i.__backendId === response.data.__backendId) || 
         (i.id && response.data.id && i.id === response.data.id)
       );
 
       if (index > -1) {
-        // ถ้าเจอ: แทนที่ข้อมูลเก่าด้วยข้อมูลใหม่
         allData[index] = response.data;
-        
-        // ถ้าข้อมูลที่แก้ คือตัวเราเอง (เช่น แก้ชื่อ) ให้อัพเดทชื่อบนหัวเว็บด้วย
         if (currentUser && (
             (currentUser.__backendId && currentUser.__backendId === response.data.__backendId) ||
             (currentUser.id && currentUser.id === response.data.id)
@@ -350,30 +278,23 @@
           currentUser.displayName = displayName || response.data.username;
         }
       } else {
-        // ถ้าหาไม่เจอจริงๆ (กรณีสุดวิสัย) ให้เพิ่มเป็นตัวใหม่
-        console.warn('Item not found in local data, pushing as new.');
         allData.push(response.data);
       }
     } 
     else if (response.action === 'delete') {
-      // ลบข้อมูล โดยเช็คทั้ง 2 แบบเหมือนกัน
       allData = allData.filter(i => {
          const matchBackend = i.__backendId && response.id && i.__backendId === response.id;
          const matchId = i.id && response.id && i.id === response.id;
-         return !(matchBackend || matchId); // คืนค่า True ถ้า "ไม่ใช่" ตัวที่ถูกลบ
+         return !(matchBackend || matchId);
       });
     }
     
-    // บันทึกลงเครื่องทันที
     localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
-    
-    // ปิด Modal (ถ้าเปิดอยู่)
     closeModal();
-    
-    // 🔄 วาดหน้าจอใหม่ทันที!
     renderDashboard(); 
   }
 
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการยืม
   function onBorrowSuccess(response) {
       if (!response.success) {
         return onFailure(new Error(response.message || 'Borrow operation failed'));
@@ -390,38 +311,18 @@
         allData.push(response.item);
       }
 
-      // [เพิ่มบรรทัดนี้] อัปเดตข้อมูลในเครื่องทันที
       localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
-
       closeModal();
       currentTab = 'borrow';
       renderDashboard();
     }
 
-  function refreshData() {
-    console.log('Refreshing data...');
-    // [Vercel Fix]
-    callApi('sync')
-      .then(response => {
-        if (response.success && response.data) {
-          allData = response.data;
-          console.log('Data Refreshed:', allData.length);
-          renderDashboard();
-        } else {
-          onFailure(new Error('Failed to refresh data.'));
-        }
-      })
-      .catch(onFailure);
-  }
-
   function onFailure(error) {
     console.error('API Error:', error);
-    
     const errorBox = loginErrorElement || document.querySelector('.error-toast');
     if (errorBox && !document.querySelector('.error-toast')) {
          showErrorMessage(error.message);
     }
-    
     const modalSubmitBtn = document.querySelector('.modal-content button[type="submit"]');
     if (modalSubmitBtn) {
         modalSubmitBtn.disabled = false;
@@ -433,7 +334,7 @@
     }
   }
 
-  // --- CRUD Functions (Replacement) ---
+  // --- CRUD Functions ---
 
   function createItem(data) {
     console.log('Creating item...', data);
@@ -452,16 +353,10 @@
     if(!modalElement) modalElement = document.getElementById('modal');
     modalElement.innerHTML = `
       <div class="modal-content">
-        <div class="modal-header">
-          <h3>ยืนยันการลบข้อมูล</h3>
-          <button class="close-btn" onclick="closeModal()">×</button>
-        </div>
+        <div class="modal-header"><h3>ยืนยันการลบข้อมูล</h3><button class="close-btn" onclick="closeModal()">×</button></div>
         <div style="text-align: center; padding: 20px 0;">
           <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-          <p style="margin-bottom: 24px; color: #6b7280; font-size: 16px;">
-            ต้องการลบ "<strong>${item.name || item.username}</strong>" หรือไม่?<br>
-            <small>การดำเนินการนี้ไม่สามารถยกเลิกได้</small>
-          </p>
+          <p style="margin-bottom: 24px; color: #6b7280; font-size: 16px;">ต้องการลบ "<strong>${item.name || item.username}</strong>" หรือไม่?<br><small>การดำเนินการนี้ไม่สามารถยกเลิกได้</small></p>
         </div>
         <div style="display: flex; gap: 12px; justify-content: center;">
           <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
@@ -484,21 +379,11 @@
   // --- Original Functions ---
 
   async function initializeDefaultAdmin() {
-    const adminExists = allData.find(item =>
-      item.type === 'user' && item.username === 'admin'
-    );
-
+    const adminExists = allData.find(item => item.type === 'user' && item.username === 'admin');
     if (!adminExists) {
-      console.log('Admin user not found, creating...');
       const adminData = {
-        id: 'admin-' + Date.now(),
-        type: 'user',
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin',
-        createdAt: new Date().toISOString()
+        id: 'admin-' + Date.now(), type: 'user', username: 'admin', password: 'admin123', role: 'admin', createdAt: new Date().toISOString()
       };
-      
       callApi('create', adminData).then(onAdminCreated).catch(onFailure);
     } else {
       renderLogin();
@@ -506,18 +391,12 @@
   }
   
   function onAdminCreated(response) {
-    if (!response.success) {
-      return onFailure(new Error('Failed to create admin user.'));
-    }
-    console.log('Admin user created. Re-syncing...');
+    if (!response.success) { return onFailure(new Error('Failed to create admin user.')); }
     callApi('sync').then((syncResponse) => {
         if (syncResponse.success && syncResponse.data) {
           allData = syncResponse.data;
-          console.log('Data Synced post-admin creation:', allData.length);
           renderLogin();
-        } else {
-          onFailure(new Error('Failed to sync after admin creation.'));
-        }
+        } else { onFailure(new Error('Failed to sync after admin creation.')); }
     }).catch(onFailure);
   }
 
@@ -531,30 +410,17 @@
       <div class="login-container">
         <div class="login-box">
           <div class="logo-container">
-            <div class="logo">
-              ${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '🧪'}
-            </div>
+            <div class="logo">${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '🧪'}</div>
             <h1 class="system-title">${title}</h1>
             <p class="subtitle">${welcomeMsg}</p>
           </div>
           <div id="loginError"></div>
           <form id="loginForm">
-            <div class="form-group">
-  <label for="username">ชื่อผู้ใช้งาน</label>
-  <input type="text" id="username" required placeholder="กรอกชื่อผู้ใช้งาน"> </div>
-<div class="form-group">
-  <label for="password">รหัสผ่าน</label>
-  <div class="input-wrapper">
-    <input type="password" id="password" required placeholder="กรอกรหัสผ่าน"> <span class="eye-icon" onclick="togglePassword()">${SVG_EYE_SHOW}</span>
-  </div>
-</div>
+            <div class="form-group"><label for="username">ชื่อผู้ใช้งาน</label><input type="text" id="username" required placeholder="กรอกชื่อผู้ใช้งาน"></div>
+            <div class="form-group"><label for="password">รหัสผ่าน</label><div class="input-wrapper"><input type="password" id="password" required placeholder="กรอกรหัสผ่าน"><span class="eye-icon" onclick="togglePassword()">${SVG_EYE_SHOW}</span></div></div>
             <button type="submit" id="loginButton" class="btn btn-primary">เข้าสู่ระบบ</button>
           </form>
-          <div class="info-box" style="margin-top: 20px;">
-    <p style="text-align: center; white-space: nowrap; font-size: 13px;">
-        ระบบจัดการสารเคมีห้องปฏิบัติการ | ครูอานนท์ เมืองแก้ว
-    </p>
-</div>
+          <div class="info-box" style="margin-top: 20px;"><p style="text-align: center; white-space: nowrap; font-size: 13px;">ระบบจัดการสารเคมีห้องปฏิบัติการ | ครูอานนท์ เมืองแก้ว</p></div>
         </div>
       </div>
     `;
@@ -565,18 +431,17 @@
   }
 
   function togglePassword() {
-  const passwordInput = document.getElementById('password');
-  const eyeIcon = document.querySelector('#loginForm .eye-icon'); 
-  if (!passwordInput || !eyeIcon) return;
-
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    eyeIcon.innerHTML = SVG_EYE_HIDE;
-  } else {
-    passwordInput.type = 'password';
-    eyeIcon.innerHTML = SVG_EYE_SHOW;
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.querySelector('#loginForm .eye-icon'); 
+    if (!passwordInput || !eyeIcon) return;
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeIcon.innerHTML = SVG_EYE_HIDE;
+    } else {
+      passwordInput.type = 'password';
+      eyeIcon.innerHTML = SVG_EYE_SHOW;
+    }
   }
-}
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -587,14 +452,11 @@
     if(loginErrorElement) loginErrorElement.innerHTML = '';
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    
-    callApi('login', { username: username, password: password })
-      .then(onLoginSuccess)
-      .catch(onFailure);
+    callApi('login', { username: username, password: password }).then(onLoginSuccess).catch(onFailure);
   }
   
+  // ✅ แก้ไข: ล็อคอินปุ๊บ เข้าได้ปั๊บ + มีป๊อปอัพต้อนรับ
   function onLoginSuccess(response) {
-    // คืนค่าปุ่ม
     if(loginButtonElement) {
       loginButtonElement.disabled = false;
       loginButtonElement.textContent = 'เข้าสู่ระบบ';
@@ -602,21 +464,18 @@
 
     if (response.success && response.user) {
       currentUser = response.user;
-      
       const displayName = (`${currentUser.firstName || ''} ${currentUser.lastName || ''}`).trim();
       currentUser.displayName = displayName || currentUser.username; 
-      
       currentView = currentUser.role === 'admin' ? 'admin' : 'teacher';
       currentTab = 'dashboard';
       
-      // ✅ 1. แสดงป๊อปอัพต้อนรับ "ทันที" (ไม่ต้องรออะไรทั้งนั้น)
+      // แสดงป๊อปอัพยินดีต้อนรับทันที
       showWelcomeToast(currentUser.displayName, currentUser.role);
 
-      // ✅ 2. วาดหน้า Dashboard "ทันที"
+      // เข้า Dashboard ทันที
       if (allData && allData.length > 0) {
         renderDashboard();
       } else {
-        // กรณีสุดวิสัยจริงๆ (เช่น เพิ่งเคลียร์ cache มา) ค่อยขึ้นโหลด
         appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังเตรียมข้อมูล...</h2></div></div>`;
         callApi('sync').then(res => {
              if(res.success && res.data) {
@@ -629,29 +488,15 @@
 
     } else {
       if(loginErrorElement) {
-        loginErrorElement.innerHTML =
-          '<div class="error-message">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>';
+        loginErrorElement.innerHTML = '<div class="error-message">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>';
       }
     }
   }
-
-  function onLoginSyncSuccess(response) {
-    if (response.success && response.data) {
-      allData = response.data;
-      console.log('Data Synced Post-Login:', allData.length);
-      renderDashboard();
-    } else {
-      onFailure(new Error('Failed to sync data after login.'));
-    }
-  }
-
-  // --- Render Functions (เหมือนเดิม แค่ตัดส่วนไม่เกี่ยวข้อง) ---
 
   function renderDashboard() {
     if (!appElement) appElement = document.getElementById('app');
     const title = defaultConfig.system_title;
     const logoUrl = defaultConfig.logo_url;
-
     if (currentUser.role === 'admin') {
       renderAdminDashboard(title, logoUrl);
     } else {
@@ -664,7 +509,6 @@
     const chemicals = allData.filter(item => item.type === 'chemical');
     const equipment = allData.filter(item => item.type === 'equipment');
     const users = allData.filter(item => item.type === 'user' && item.role === 'teacher');
-    
     const lowStockChemicals = chemicals.filter(item => item.quantity <= (item.minStock || 0));
     const lowStockEquipment = equipment.filter(item => item.quantity <= (item.minStock || 0));
     const totalLowStock = lowStockChemicals.length + lowStockEquipment.length; 
@@ -674,12 +518,11 @@
         <div class="header">
           <div class="header-left">
             <div class="header-logo">${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '🧪'}</div>
-            <div class="header-info">
-              <h2 class="system-title">${title}</h2>
-              <p>ผู้ดูแลระบบ: ${currentUser.displayName}</p>
-            </div>
+            <div class="header-info"><h2 class="system-title">${title}</h2><p>ผู้ดูแลระบบ: ${currentUser.displayName}</p></div>
           </div>
+          <!-- ✅ เพิ่ม btn-logout ที่นี่ -->
           <div class="header-right"><button class="btn btn-secondary btn-small btn-logout" onclick="logout()">ออกจากระบบ</button></div>
+        </div>
         <div class="nav-tabs">
           <button class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')">📊 ภาพรวม</button>
           <button class="nav-tab ${currentTab === 'chemicals' ? 'active' : ''}" onclick="switchTab('chemicals')">🧬 จัดการสารเคมี</button>
@@ -693,59 +536,13 @@
             <div class="stat-card"><h3>สารเคมีทั้งหมด</h3><p class="number">${chemicals.length}</p></div>
             <div class="stat-card"><h3>อุปกรณ์ทั้งหมด</h3><p class="number">${equipment.length}</p></div>
             <div class="stat-card"><h3>ผู้ใช้งาน</h3><p class="number">${users.length}</p></div>
-            <div class="stat-card">
-              <h3>สต็อกต่ำ</h3>
-              <p class="number" style="color: #dc2626;">${totalLowStock}</p>
-            </div>
+            <div class="stat-card"><h3>สต็อกต่ำ</h3><p class="number" style="color: #dc2626;">${totalLowStock}</p></div>
           </div>
-
           ${lowStockChemicals.length > 0 ? `
-            <div class="card">
-              <div class="academic-header">
-                <h3>🧬 แจ้งเตือนสต็อกต่ำ (สารเคมี)</h3>
-              </div>
-              <div class="table-container">
-                <table>
-                  <thead>
-                    <tr><th>ชื่อสารเคมี</th><th>สูตรเคมี</th><th>จำนวนคงเหลือ</th><th>สต็อกขั้นต่ำ</th><th>สถานที่เก็บ</th></tr>
-                  </thead>
-                  <tbody>
-                    ${lowStockChemicals.map(item => `
-                      <tr>
-                        <td><strong>${item.name}</strong></td>
-                        <td>${item.formula || '-'}</td>
-                        <td><span class="badge badge-low">${item.quantity} ${item.unit}</span></td>
-                        <td>${item.minStock || 0} ${item.unit}</td>
-                        <td>${item.location}</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <div class="card"><div class="academic-header"><h3>🧬 แจ้งเตือนสต็อกต่ำ (สารเคมี)</h3></div><div class="table-container"><table><thead><tr><th>ชื่อสารเคมี</th><th>สูตรเคมี</th><th>จำนวนคงเหลือ</th><th>สต็อกขั้นต่ำ</th><th>สถานที่เก็บ</th></tr></thead><tbody>${lowStockChemicals.map(item => `<tr><td><strong>${item.name}</strong></td><td>${item.formula || '-'}</td><td><span class="badge badge-low">${item.quantity} ${item.unit}</span></td><td>${item.minStock || 0} ${item.unit}</td><td>${item.location}</td></tr>`).join('')}</tbody></table></div></div>
           ` : ''}
-
           ${lowStockEquipment.length > 0 ? `
-            <div class="card">
-              <div class="academic-header">
-                <h3>🔬 แจ้งเตือนสต็อกต่ำ (อุปกรณ์)</h3>
-              </div>
-              <div class="table-container">
-                <table>
-                  <thead><tr><th>ชื่ออุปกรณ์</th><th>จำนวนคงเหลือ</th><th>สต็อกขั้นต่ำ</th><th>สถานที่เก็บ</th></tr></thead>
-                  <tbody>
-                    ${lowStockEquipment.map(item => `
-                      <tr>
-                        <td><strong>${item.name}</strong></td>
-                        <td><span class="badge badge-low">${item.quantity} ${item.unit}</span></td>
-                        <td>${item.minStock || 0} ${item.unit}</td>
-                        <td>${item.location}</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <div class="card"><div class="academic-header"><h3>🔬 แจ้งเตือนสต็อกต่ำ (อุปกรณ์)</h3></div><div class="table-container"><table><thead><tr><th>ชื่ออุปกรณ์</th><th>จำนวนคงเหลือ</th><th>สต็อกขั้นต่ำ</th><th>สถานที่เก็บ</th></tr></thead><tbody>${lowStockEquipment.map(item => `<tr><td><strong>${item.name}</strong></td><td><span class="badge badge-low">${item.quantity} ${item.unit}</span></td><td>${item.minStock || 0} ${item.unit}</td><td>${item.location}</td></tr>`).join('')}</tbody></table></div></div>
           ` : ''}
           ${totalLowStock === 0 ? `<div class="card"><div class="empty-state" style="padding: 40px 20px;"><div class="empty-state-icon" style="font-size: 48px; margin-bottom: 16px;">✅</div><span style="color: #6b7280;">ยอดเยี่ยม!</span><br>ไม่มีรายการสต็อกต่ำ</div></div>` : ''}
         </div>
@@ -1039,7 +836,8 @@
             <div class="header-logo">${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '🧪'}</div>
             <div class="header-info"><h2 class="system-title">${title}</h2><p>ครูผู้ใช้งาน: ${currentUser.displayName}</p></div>
           </div>
-          <div class="header-right"><button class="btn btn-secondary btn-small" onclick="logout()">ออกจากระบบ</button></div>
+          <!-- ✅ เพิ่ม btn-logout ที่นี่ -->
+          <div class="header-right"><button class="btn btn-secondary btn-small btn-logout" onclick="logout()">ออกจากระบบ</button></div>
         </div>
         <div class="nav-tabs">
           <button class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')">🏠 หน้าหลัก</button>
@@ -1177,8 +975,7 @@
     currentUser = null;
     currentView = 'login';
     currentTab = 'dashboard';
-    // allData = [];  <-- ลบบรรทัดนี้ทิ้ง หรือใส่ // ไว้ข้างหน้าครับ
-    // เราจะเก็บข้อมูลไว้ในหน่วยความจำ เพื่อให้คนต่อไปล็อคอินได้ทันทีไม่ต้องโหลดใหม่
+    // ไม่ลบ allData เพื่อให้ Login ใหม่ได้ทันที
     renderLogin();
   }
   
@@ -1226,8 +1023,6 @@
     const headers = ['ชื่อ-นามสกุล', 'ชื่อผู้ใช้', 'รหัสผ่าน'];
     downloadPDF(reportData, title, filename, headers);
   }
-
-  // === MODAL FUNCTIONS (Updated to use createItem/updateItem/callApi) ===
 
   function openAddChemicalModal() {
     if(!modalElement) modalElement = document.getElementById('modal');
@@ -1531,10 +1326,7 @@
       
       const updatedItem = { ...item, quantity: item.quantity - amount };
 
-      // [Vercel Fix] ใช้ callApi action 'borrow'
-      callApi('borrow', { borrowData, itemData: updatedItem })
-        .then(onBorrowSuccess)
-        .catch(onFailure);
+      callApi('borrow', { borrowData, itemData: updatedItem }).then(onBorrowSuccess).catch(onFailure);
     });
   }
 
@@ -1596,9 +1388,7 @@
       };
       const updatedItem = { ...item, quantity: item.quantity - amount };
       
-      callApi('borrow', { borrowData, itemData: updatedItem })
-        .then(onBorrowSuccess)
-        .catch(onFailure);
+      callApi('borrow', { borrowData, itemData: updatedItem }).then(onBorrowSuccess).catch(onFailure);
     });
   }
 
@@ -1646,9 +1436,7 @@
       };
       const updatedItem = { ...item, quantity: item.quantity - amount };
       
-      callApi('borrow', { borrowData, itemData: updatedItem })
-        .then(onBorrowSuccess)
-        .catch(onFailure);
+      callApi('borrow', { borrowData, itemData: updatedItem }).then(onBorrowSuccess).catch(onFailure);
     });
   }
 
@@ -1761,6 +1549,7 @@
     });
   }
 
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการแจ้งปัญหาจากรายการยืม
   function reportIssueFromBorrow(borrowItem) {
     const item = allData.find(i => i.__backendId === borrowItem.itemId);
     if (!item) return;
@@ -1795,7 +1584,6 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังแจ้ง...';
-      
       const issueAmount = parseFloat(document.getElementById('issueAmount').value);
       const note = document.getElementById('issueNote').value;
       const remainingAmount = Math.max(0, borrowItem.amount - issueAmount);
@@ -1832,21 +1620,18 @@
         issueNote: note
       };
 
-      // สร้างรายงานปัญหา
       callApi('create', issueReport)
         .then(response => {
           if (!response.success) return onFailure(new Error('Failed to create issue report'));
-          
-          // ✅ [จุดสำคัญ] สั่งอัพเดทหน้าจอว่ามี Issue แล้ว
+          // ✅ อัพเดทหน้าจอทันที
           onCrudSuccess(response);
-
-          // แล้วค่อยไปอัพเดทข้อมูลการยืม
           updateItem(updatedBorrow);
         })
         .catch(onFailure);
     });
   }
 
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการแก้ไขการยืม
   function editBorrow(item) {
     if(!modalElement) modalElement = document.getElementById('modal');
     modalElement.innerHTML = `
@@ -1868,23 +1653,18 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังบันทึก...';
-      
       const newAmount = parseFloat(document.getElementById('editAmount').value);
       const originalAmount = item.amount;
       const difference = newAmount - originalAmount;
-      
       const updatedBorrow = {
         ...item,
         amount: newAmount,
         room: document.getElementById('editRoom').value
       };
-
-      // กรณีแก้แค่ห้อง (ไม่แก้จำนวน)
       if (difference === 0) {
         updateItem(updatedBorrow);
         return;
       }
-      
       const currentItem = allData.find(i => i.__backendId === item.itemId);
       if (!currentItem) {
           showErrorMessage('ไม่พบรายการต้นฉบับในสต็อก');
@@ -1892,25 +1672,21 @@
           submitBtn.textContent = 'บันทึกการแก้ไข';
           return;
       }
-
       if (difference > 0 && currentItem.quantity < difference) {
         showErrorMessage('จำนวนคงเหลือไม่เพียงพอสำหรับการเพิ่มจำนวนยืม');
         submitBtn.disabled = false;
         submitBtn.textContent = 'บันทึกการแก้ไข';
         return;
       }
-
       const updatedItem = {
         ...currentItem,
         quantity: currentItem.quantity - difference 
       };
 
-      // อัพเดทสต็อกก่อน
       callApi('update', updatedItem)
         .then(response => {
             if (!response.success) return onFailure(new Error('Failed to update item stock'));
-            
-            // ✅ [จุดสำคัญ] สั่งอัพเดทสต็อกในหน้าจอ แล้วค่อยไปแก้ข้อมูลการยืม
+            // ✅ อัพเดทหน้าจอทันที
             onCrudSuccess(response);
             updateItem(updatedBorrow);
         })
@@ -1918,6 +1694,7 @@
     });
   }
 
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการคืน
   function returnItem(borrow) {
     const item = allData.find(i => i.__backendId === borrow.itemId);
     if (!item) return;
@@ -1944,10 +1721,8 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังบันทึก...';
-      
       const returnAmount = parseFloat(document.getElementById('returnAmount').value);
       const returnNote = document.getElementById('returnNote').value;
-
       const updatedBorrow = {
         ...borrow,
         returnDate: new Date().toISOString(),
@@ -1955,21 +1730,16 @@
         actualReturnAmount: returnAmount,
         returnNote: returnNote
       };
-
       const updatedItem = {
         ...item,
         quantity: item.quantity + returnAmount
       };
 
-      // 1. อัพเดทสถานะการยืมก่อน
       callApi('update', updatedBorrow)
         .then(response => {
             if (!response.success) return onFailure(new Error('Failed to update borrow record'));
-            
-            // ✅ [จุดสำคัญ] สั่งอัพเดทหน้าจอทันทีว่า "คืนแล้ว"
-            onCrudSuccess(response); 
-            
-            // 2. แล้วค่อยไปอัพเดทสต็อก (ทำงานเบื้องหลัง)
+            // ✅ อัพเดทหน้าจอทันที
+            onCrudSuccess(response);
             updateItem(updatedItem);
         })
         .catch(onFailure);
@@ -2322,69 +2092,44 @@
       showErrorMessage('ไม่มีข้อมูลสำหรับดาวน์โหลด');
       return;
     }
-    
     const systemTitle = defaultConfig.system_title;
     const printWindow = window.open('', '_blank');
     printWindow.document.write('<html><head><title>กำลังสร้าง PDF...</title><style>body{font-family: Sarabun, sans-serif; text-align: center; padding-top: 50px;} h2{color: #60a5fa;}</style></head><body><h2>กำลังเตรียมข้อมูลสำหรับพิมพ์...</h2><p>กรุณารอสักครู่</p></body></html>');
     printWindow.document.close();
 
-    // [Vercel Fix] ใช้ callApi action 'getPdf'
     callApi('getPdf', { reportData: data, title, systemTitle, headers })
       .then(response => {
-        if (!response.html) {
-           throw new Error('No HTML content returned');
-        }
+        if (!response.html) { throw new Error('No HTML content returned'); }
         printWindow.document.open();
         printWindow.document.write(response.html);
         printWindow.document.close();
-        
-        printWindow.onload = function() {
-          setTimeout(() => {
-            printWindow.focus(); 
-            printWindow.print();
-          }, 500);
-        };
+        printWindow.onload = function() { setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500); };
       })
-      .catch(error => {
-        printWindow.close();
-        onFailure(error);
-      });
+      .catch(error => { printWindow.close(); onFailure(error); });
   }
-   // --- ฟังก์ชันแสดง Welcome Popup ---
-function showWelcomeToast(name, role) {
-  // ลบอันเก่าถ้ามีค้างอยู่
-  const existingToast = document.querySelector('.welcome-toast');
-  if (existingToast) existingToast.remove();
 
-  // เลือกไอคอนตาม Role
-  const icon = role === 'admin' ? '👨‍💻' : '👨‍🏫';
-  const roleText = role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน';
+  // ✅ ฟังก์ชันแสดง Welcome Popup
+  function showWelcomeToast(name, role) {
+    const existingToast = document.querySelector('.welcome-toast');
+    if (existingToast) existingToast.remove();
 
-  // สร้าง HTML
-  const toast = document.createElement('div');
-  toast.className = 'welcome-toast';
-  toast.innerHTML = `
-    <div class="welcome-icon-circle">${icon}</div>
-    <div class="welcome-content">
-        <span class="welcome-title">ยินดีต้อนรับ, ${roleText}</span>
-        <span class="welcome-name">${name}</span>
-    </div>
-  `;
+    const icon = role === 'admin' ? '👨‍💻' : '👨‍🏫';
+    const roleText = role === 'admin' ? 'ผู้ดูแลระบบ' : 'ครูผู้สอน';
 
-  document.body.appendChild(toast);
+    const toast = document.createElement('div');
+    toast.className = 'welcome-toast';
+    toast.innerHTML = `
+      <div class="welcome-icon-circle">${icon}</div>
+      <div class="welcome-content">
+          <span class="welcome-title">ยินดีต้อนรับ, ${roleText}</span>
+          <span class="welcome-name">${name}</span>
+      </div>
+    `;
 
-  // สั่งให้แสดง (Animation Slide Down)
-  requestAnimationFrame(() => {
-    toast.classList.add('show');
-  });
-
-  // ซ่อนอัตโนมัติเมื่อผ่านไป 3.5 วินาที
-  setTimeout(() => {
-    toast.classList.remove('show');
-    // ลบออกจาก DOM หลัง Animation จบ
-    setTimeout(() => toast.remove(), 600);
-  }, 3500);
-}
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => { toast.classList.add('show'); });
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 3500);
+  }
 </script>
  </body>
 </html>
