@@ -183,23 +183,63 @@
     console.log('App initializing...');
     appElement = document.getElementById('app');
     
-    appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังเชื่อมต่อเซิร์ฟเวอร์...</h2></div></div>`;
+    // 1. ลองดึงข้อมูลจาก LocalStorage (ความจำในเครื่อง) ก่อน
+    const cachedData = localStorage.getItem('smartlab_local_data');
     
-    // [Vercel Fix] เรียก API sync
+    if (cachedData) {
+      // A. ถ้ามีของเดิม: โหลดทันที ไม่ต้องรอ!
+      try {
+        allData = JSON.parse(cachedData);
+        console.log('Loaded from Cache:', allData.length);
+        initializeDefaultAdmin(); // แสดงหน้า Login ทันที
+        
+        // แอบ Sync ข้อมูลล่าสุดอยู่ข้างหลัง (Background Sync)
+        callApi('sync')
+          .then(response => {
+            if (response.success && response.data) {
+              console.log('Background Sync Complete');
+              allData = response.data;
+              localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
+              // ถ้าหน้าปัจจุบันเป็น Dashboard (ไม่ใช่ Login) ให้รีเฟรชข้อมูลที่แสดง
+              if (currentView !== 'login') {
+                renderDashboard();
+              }
+            }
+          })
+          .catch(err => console.warn('Background sync failed:', err));
+          
+      } catch (e) {
+        console.error('Cache parsing error', e);
+        localStorage.removeItem('smartlab_local_data'); // ลบ cache ที่เสีย
+        startFreshSync(); // โหลดใหม่แบบปกติ
+      }
+    } else {
+      // B. ถ้าเข้าครั้งแรกเลย: ต้องแสดง Loading
+      startFreshSync();
+    }
+  }
+
+  function startFreshSync() {
+    appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังเชื่อมต่อเซิร์ฟเวอร์...</h2></div></div>`;
     callApi('sync')
-      .then(response => onSyncSuccess(response))
-      .catch(error => onFailure(error));
+      .then(onSyncSuccess)
+      .catch(onFailure);
   }
 
   function onSyncSuccess(response) {
     if (response.success && response.data) {
       allData = response.data;
       console.log('Data Synced:', allData.length);
+      
+      // [สำคัญ] บันทึกลงเครื่องไว้ใช้คราวหน้า
+      localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
+      
       initializeDefaultAdmin();
     } else {
       onFailure(new Error('Failed to sync data or no data returned.'));
     }
   }
+
   
   function onCrudSuccess(response) {
     if (!response.success) {
