@@ -127,7 +127,21 @@
         .report-group-details .table-container { box-shadow: none; border: none; border-radius: 0; }
         .report-group-details table th { background: #f0f9ff; color: #0c4a6e; }
         .page-footer { text-align: center; padding: 24px 0; margin-top: auto; color: #718096; font-size: 13px; font-weight: 500; border-top: 1px solid #cbd5e1; background-color: #f8fafc; border-radius: 12px; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
-  /* === CSS สำหรับ Welcome Toast === */
+  /* สไตล์สำหรับปุ่มออกจากระบบเมื่อเอาเมาส์ชี้ */
+.btn-logout {
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    /* เปลี่ยนเป็นสีแดงไล่เฉดสวยๆ */
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border: 1px solid #dc2626 !important;
+    /* เพิ่มเงาสีแดงฟุ้งๆ */
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    transform: translateY(-1px);
+}
+   /* === CSS สำหรับ Welcome Toast === */
 .welcome-toast {
     position: fixed;
     top: 30px;
@@ -665,8 +679,7 @@
               <p>ผู้ดูแลระบบ: ${currentUser.displayName}</p>
             </div>
           </div>
-          <div class="header-right"><button class="btn btn-secondary btn-small" onclick="logout()">ออกจากระบบ</button></div>
-        </div>
+          <div class="header-right"><button class="btn btn-secondary btn-small btn-logout" onclick="logout()">ออกจากระบบ</button></div>
         <div class="nav-tabs">
           <button class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')">📊 ภาพรวม</button>
           <button class="nav-tab ${currentTab === 'chemicals' ? 'active' : ''}" onclick="switchTab('chemicals')">🧬 จัดการสารเคมี</button>
