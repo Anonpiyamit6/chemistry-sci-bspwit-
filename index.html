@@ -1782,6 +1782,7 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังแจ้ง...';
+      
       const issueAmount = parseFloat(document.getElementById('issueAmount').value);
       const note = document.getElementById('issueNote').value;
       const remainingAmount = Math.max(0, borrowItem.amount - issueAmount);
@@ -1818,9 +1819,15 @@
         issueNote: note
       };
 
+      // สร้างรายงานปัญหา
       callApi('create', issueReport)
         .then(response => {
           if (!response.success) return onFailure(new Error('Failed to create issue report'));
+          
+          // ✅ [จุดสำคัญ] สั่งอัพเดทหน้าจอว่ามี Issue แล้ว
+          onCrudSuccess(response);
+
+          // แล้วค่อยไปอัพเดทข้อมูลการยืม
           updateItem(updatedBorrow);
         })
         .catch(onFailure);
@@ -1848,18 +1855,23 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังบันทึก...';
+      
       const newAmount = parseFloat(document.getElementById('editAmount').value);
       const originalAmount = item.amount;
       const difference = newAmount - originalAmount;
+      
       const updatedBorrow = {
         ...item,
         amount: newAmount,
         room: document.getElementById('editRoom').value
       };
+
+      // กรณีแก้แค่ห้อง (ไม่แก้จำนวน)
       if (difference === 0) {
         updateItem(updatedBorrow);
         return;
       }
+      
       const currentItem = allData.find(i => i.__backendId === item.itemId);
       if (!currentItem) {
           showErrorMessage('ไม่พบรายการต้นฉบับในสต็อก');
@@ -1867,20 +1879,26 @@
           submitBtn.textContent = 'บันทึกการแก้ไข';
           return;
       }
+
       if (difference > 0 && currentItem.quantity < difference) {
         showErrorMessage('จำนวนคงเหลือไม่เพียงพอสำหรับการเพิ่มจำนวนยืม');
         submitBtn.disabled = false;
         submitBtn.textContent = 'บันทึกการแก้ไข';
         return;
       }
+
       const updatedItem = {
         ...currentItem,
         quantity: currentItem.quantity - difference 
       };
 
+      // อัพเดทสต็อกก่อน
       callApi('update', updatedItem)
         .then(response => {
             if (!response.success) return onFailure(new Error('Failed to update item stock'));
+            
+            // ✅ [จุดสำคัญ] สั่งอัพเดทสต็อกในหน้าจอ แล้วค่อยไปแก้ข้อมูลการยืม
+            onCrudSuccess(response);
             updateItem(updatedBorrow);
         })
         .catch(onFailure);
@@ -1913,8 +1931,10 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังบันทึก...';
+      
       const returnAmount = parseFloat(document.getElementById('returnAmount').value);
       const returnNote = document.getElementById('returnNote').value;
+
       const updatedBorrow = {
         ...borrow,
         returnDate: new Date().toISOString(),
@@ -1922,14 +1942,21 @@
         actualReturnAmount: returnAmount,
         returnNote: returnNote
       };
+
       const updatedItem = {
         ...item,
         quantity: item.quantity + returnAmount
       };
 
+      // 1. อัพเดทสถานะการยืมก่อน
       callApi('update', updatedBorrow)
         .then(response => {
             if (!response.success) return onFailure(new Error('Failed to update borrow record'));
+            
+            // ✅ [จุดสำคัญ] สั่งอัพเดทหน้าจอทันทีว่า "คืนแล้ว"
+            onCrudSuccess(response); 
+            
+            // 2. แล้วค่อยไปอัพเดทสต็อก (ทำงานเบื้องหลัง)
             updateItem(updatedItem);
         })
         .catch(onFailure);
