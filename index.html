@@ -302,28 +302,61 @@
 
   
   function onCrudSuccess(response) {
-    // ... (โค้ดเดิมช่วงตรวจสอบ success) ...
-    if (!response.success) { /* ... */ return; }
-
-    console.log('CRUD Success:', response.action);
-    
-    // ... (โค้ดเดิมที่จัดการ allData.push หรือ allData[index] = ...) ...
-    if (response.action === 'create') {
-      allData.push(response.data);
-    } else if (response.action === 'update') {
-      // ... (Logic เดิม) ...
-      const index = allData.findIndex(i => i.__backendId === response.data.__backendId);
-      if (index > -1) allData[index] = response.data;
-      else allData.push(response.data);
-      // ...
-    } else if (response.action === 'delete') {
-      allData = allData.filter(i => i.__backendId !== response.id);
+    if (!response.success) {
+      const specificError = response.message || 'CRUD operation failed';
+      showErrorMessage(specificError); 
+      onFailure(new Error(specificError));
+      return;
     }
     
-    // [เพิ่มบรรทัดนี้] อัปเดตข้อมูลในเครื่องทันที
+    console.log('✅ Update Success:', response.action);
+    
+    // อัพเดทข้อมูลใน allData (Memory)
+    if (response.action === 'create') {
+      // ถ้าสร้างใหม่ ให้ใส่เข้าไปเลย
+      allData.push(response.data);
+    } 
+    else if (response.action === 'update') {
+      // 🟢 [จุดสำคัญ] ค้นหาไอเท็มที่จะอัพเดท โดยเช็คทั้ง __backendId และ id
+      const index = allData.findIndex(i => 
+        (i.__backendId && response.data.__backendId && i.__backendId === response.data.__backendId) || 
+        (i.id && response.data.id && i.id === response.data.id)
+      );
+
+      if (index > -1) {
+        // ถ้าเจอ: แทนที่ข้อมูลเก่าด้วยข้อมูลใหม่
+        allData[index] = response.data;
+        
+        // ถ้าข้อมูลที่แก้ คือตัวเราเอง (เช่น แก้ชื่อ) ให้อัพเดทชื่อบนหัวเว็บด้วย
+        if (currentUser && (
+            (currentUser.__backendId && currentUser.__backendId === response.data.__backendId) ||
+            (currentUser.id && currentUser.id === response.data.id)
+        )) {
+          const displayName = (`${response.data.firstName || ''} ${response.data.lastName || ''}`).trim();
+          currentUser.displayName = displayName || response.data.username;
+        }
+      } else {
+        // ถ้าหาไม่เจอจริงๆ (กรณีสุดวิสัย) ให้เพิ่มเป็นตัวใหม่
+        console.warn('Item not found in local data, pushing as new.');
+        allData.push(response.data);
+      }
+    } 
+    else if (response.action === 'delete') {
+      // ลบข้อมูล โดยเช็คทั้ง 2 แบบเหมือนกัน
+      allData = allData.filter(i => {
+         const matchBackend = i.__backendId && response.id && i.__backendId === response.id;
+         const matchId = i.id && response.id && i.id === response.id;
+         return !(matchBackend || matchId); // คืนค่า True ถ้า "ไม่ใช่" ตัวที่ถูกลบ
+      });
+    }
+    
+    // บันทึกลงเครื่องทันที
     localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
     
+    // ปิด Modal (ถ้าเปิดอยู่)
     closeModal();
+    
+    // 🔄 วาดหน้าจอใหม่ทันที!
     renderDashboard(); 
   }
 
