@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartLab Chemical Inventory System</title>
-  
-  <!-- [เพิ่ม] Library สำหรับอ่านไฟล์ Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
         body { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); min-height: 100%; line-height: 1.6; }
@@ -40,11 +36,6 @@
         .btn-danger:hover { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); transform: translateY(-1px); }
         .btn-success { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
         .btn-success:hover { background: linear-gradient(135deg, #047857 0%, #065f46 100%); transform: translateY(-1px); }
-        
-        /* [เพิ่ม] ปุ่มสีน้ำเงินสำหรับ Word */
-        .btn-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        .btn-info:hover { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transform: translateY(-1px); }
-
         .btn-small { padding: 8px 16px; font-size: 13px; margin: 0 4px; border-radius: 10px; }
         .error-message { background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; text-align: center; border: 1px solid #fecaca; }
         .dashboard { display: none; }
@@ -136,7 +127,7 @@
         .report-group-details table th { background: #f0f9ff; color: #0c4a6e; }
         .page-footer { text-align: center; padding: 24px 0; margin-top: auto; color: #718096; font-size: 13px; font-weight: 500; border-top: 1px solid #cbd5e1; background-color: #f8fafc; border-radius: 12px; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
         
-        /* สไตล์สำหรับปุ่มออกจากระบบ (สีแดงเมื่อชี้) */
+        /* ✅ สไตล์สำหรับปุ่มออกจากระบบ (สีแดงเมื่อชี้) */
         .btn-logout { transition: all 0.3s ease; }
         .btn-logout:hover {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
@@ -146,7 +137,7 @@
             transform: translateY(-1px);
         }
 
-        /* สไตล์สำหรับ Welcome Toast */
+        /* ✅ สไตล์สำหรับ Welcome Toast */
         .welcome-toast {
             position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-150%);
             background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -167,10 +158,6 @@
  </head>
  <body>
   <div id="app"></div>
-  
-  <!-- [เพิ่ม] Input File ซ่อนไว้สำหรับ Import Excel -->
-  <input type="file" id="excelInput" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
-
   <script>
   // [IMPORTANT] ใส่ URL Web App ของคุณที่นี่
   const API_URL = "https://script.google.com/macros/s/AKfycbxXd30mi6wPOKskw8A-yuUCwRf6YybXhqYdOotTg_i2Y5DhRvI7ZY-t3X7dMD_tCtkjUw/exec";
@@ -260,6 +247,7 @@
     }
   }
   
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการ สร้าง/แก้ไข/ลบ
   function onCrudSuccess(response) {
     if (!response.success) {
       const specificError = response.message || 'CRUD operation failed';
@@ -268,28 +256,13 @@
       return;
     }
     
-    // [ใหม่] กรณี Batch Create (Import Excel)
-    if (response.message && response.message.includes('Imported')) {
-       showWelcomeToast("นำเข้าข้อมูลสำเร็จ", "admin"); // แจ้งเตือนสวยๆ
-       
-       // โหลดข้อมูลใหม่ทั้งหมด
-       callApi('sync').then(res => {
-           if(res.success && res.data) {
-               allData = res.data;
-               localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
-               renderDashboard();
-           }
-       });
-       closeModal();
-       return;
-    }
-
     console.log('✅ CRUD Success:', response.action);
     
     if (response.action === 'create') {
       allData.push(response.data);
     } 
     else if (response.action === 'update') {
+      // ค้นหาแบบละเอียด (เช็คทั้ง backendId และ id)
       const index = allData.findIndex(i => 
         (i.__backendId && response.data.__backendId && i.__backendId === response.data.__backendId) || 
         (i.id && response.data.id && i.id === response.data.id)
@@ -321,6 +294,7 @@
     renderDashboard(); 
   }
 
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการยืม
   function onBorrowSuccess(response) {
       if (!response.success) {
         return onFailure(new Error(response.message || 'Borrow operation failed'));
@@ -359,6 +333,8 @@
         loginButtonElement.textContent = 'เข้าสู่ระบบ';
     }
   }
+
+  // --- CRUD Functions ---
 
   function createItem(data) {
     console.log('Creating item...', data);
@@ -400,6 +376,8 @@
     callApi('delete', { id: backendId }).then(onCrudSuccess).catch(onFailure);
   }
   
+  // --- Original Functions ---
+
   async function initializeDefaultAdmin() {
     const adminExists = allData.find(item => item.type === 'user' && item.username === 'admin');
     if (!adminExists) {
@@ -477,6 +455,7 @@
     callApi('login', { username: username, password: password }).then(onLoginSuccess).catch(onFailure);
   }
   
+  // ✅ แก้ไข: ล็อคอินปุ๊บ เข้าได้ปั๊บ + มีป๊อปอัพต้อนรับ
   function onLoginSuccess(response) {
     if(loginButtonElement) {
       loginButtonElement.disabled = false;
@@ -490,8 +469,10 @@
       currentView = currentUser.role === 'admin' ? 'admin' : 'teacher';
       currentTab = 'dashboard';
       
+      // แสดงป๊อปอัพยินดีต้อนรับทันที
       showWelcomeToast(currentUser.displayName, currentUser.role);
 
+      // เข้า Dashboard ทันที
       if (allData && allData.length > 0) {
         renderDashboard();
       } else {
@@ -539,7 +520,7 @@
             <div class="header-logo">${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '🧪'}</div>
             <div class="header-info"><h2 class="system-title">${title}</h2><p>ผู้ดูแลระบบ: ${currentUser.displayName}</p></div>
           </div>
-          <!-- ปุ่ม logout สีแดง -->
+          <!-- ✅ เพิ่ม btn-logout ที่นี่ -->
           <div class="header-right"><button class="btn btn-secondary btn-small btn-logout" onclick="logout()">ออกจากระบบ</button></div>
         </div>
         <div class="nav-tabs">
@@ -583,11 +564,7 @@
         <div class="academic-header"><h3>🧬 จัดการสารเคมี</h3></div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <div class="info-box" style="flex: 1; margin: 0;"><p>📋 จำนวนสารเคมีทั้งหมด: ${chemicals.length} รายการ</p></div>
-          <div style="display: flex; gap: 8px;">
-            <!-- [เพิ่ม] ปุ่มนำเข้า Excel -->
-            <button class="btn btn-success btn-small" onclick="document.getElementById('excelInput').click()">📥 นำเข้า Excel</button>
-            <button class="btn btn-primary btn-small" onclick="openAddChemicalModal()">+ เพิ่มสารเคมี</button>
-          </div>
+          <button class="btn btn-primary btn-small" onclick="openAddChemicalModal()">+ เพิ่มสารเคมี</button>
         </div>
         <div class="search-box"><input type="text" id="chemicalSearch" placeholder="🔍 ค้นหาสารเคมี (ชื่อ, สูตร, สถานที่เก็บ)..." onkeyup="filterChemicals()"></div>
         <div class="table-container academic-table">
@@ -615,69 +592,159 @@
     `;
   }
 
-  // --- [เพิ่ม] ฟังก์ชันจัดการการอัปโหลด Excel ---
-  function handleExcelUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+  function renderEquipmentSection() {
+    const equipment = allData.filter(item => item.type === 'equipment');
+    return `
+      <div class="card">
+        <div class="academic-header"><h3>🔬 จัดการอุปกรณ์</h3></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div class="info-box" style="flex: 1; margin: 0;"><p>📋 จำนวนอุปกรณ์ทั้งหมด: ${equipment.length} รายการ</p></div>
+          <button class="btn btn-primary btn-small" onclick="openAddEquipmentModal()">+ เพิ่มอุปกรณ์</button>
+        </div>
+        <div class="search-box"><input type="text" id="equipmentSearch" placeholder="🔍 ค้นหาอุปกรณ์ (ชื่อ, สถานที่เก็บ)..." onkeyup="filterEquipment()"></div>
+        <div class="table-container academic-table">
+          <table id="equipmentTable">
+            <thead><tr><th>ชื่ออุปกรณ์</th><th>จำนวน</th><th>หน่วย</th><th>สถานที่เก็บ</th><th>สต็อกขั้นต่ำ</th><th>การจัดการ</th></tr></thead>
+            <tbody>
+              ${equipment.length > 0 ? equipment.map(item => `
+                <tr>
+                  <td><strong>${item.name}</strong></td>
+                  <td><span class="badge ${item.quantity <= (item.minStock || 0) ? 'badge-low' : 'badge-normal'}">${item.quantity}</span></td>
+                  <td>${item.unit}</td>
+                  <td>${item.location}</td>
+                  <td>${item.minStock || 0}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-small" onclick='editEquipment(${JSON.stringify(item)})'>แก้ไข</button>
+                    <button class="btn btn-danger btn-small" onclick='deleteItem("${item.__backendId}")'>ลบ</button>
+                  </td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">🔬</div>ยังไม่มีข้อมูลอุปกรณ์<br><small>คลิก "เพิ่มอุปกรณ์" เพื่อเริ่มต้น</small></td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rawData = XLSX.utils.sheet_to_json(firstSheet);
+  function renderUsersSection() {
+  const users = allData.filter(item => item.type === 'user' && item.role === 'teacher');
+  return `
+    <div class="card">
+      <div class="academic-header"><h3>👥 จัดการผู้ใช้งาน</h3></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div class="info-box" style="flex: 1; margin: 0;"><p>👨‍🏫 จำนวนครูผู้ใช้งาน: ${users.length} คน</p></div>
+        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+          <button class="btn btn-primary btn-small" onclick="openAddUserModal()" style="display: flex; align-items: center; justify-content: center; padding: 6px 12px; font-weight: 500; line-height: 1.4; border-radius: 6px;">+&nbsp;เพิ่มผู้ใช้</button>
+          <button class="btn btn-danger btn-small" onclick="downloadUserReport()" style="display: flex; align-items: center; justify-content: center; padding: 6px 12px; min-width: 70px; font-weight: 500; line-height: 1.4; border-radius: 6px;">📄&nbsp;PDF</button>
+        </div>
+      </div>
+      <div class="table-container academic-table">
+        <table>
+          <thead><tr><th>ชื่อ-นามสกุล</th><th>ชื่อผู้ใช้งาน</th><th>รหัสผ่าน</th><th>สถานะ</th><th>การจัดการ</th></tr></thead>
+          <tbody>
+            ${users.length > 0 ? users.map((item) => `
+              <tr>
+                <td><strong>${(item.firstName || '') + ' ' + (item.lastName || '')}</strong></td>
+                <td>${item.username}</td>
+                <td>••••••••</td>
+                <td><span class="badge badge-normal">ใช้งานได้</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-small" onclick='editUser(${JSON.stringify(item)})'>แก้ไข</button>
+                  <button class="btn btn-danger btn-small" onclick='deleteItem("${item.__backendId}")'>ลบ</button>
+                </td>
+              </tr>`).join('') : '<tr><td colspan="5" class="empty-state"><div class="empty-state-icon">👥</div>ยังไม่มีข้อมูลผู้ใช้<br><small>คลิก "เพิ่มผู้ใช้" เพื่อเริ่มต้น</small></td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
 
-      // แปลงข้อมูลจาก Excel เป็น Format ของระบบ
-      const chemicals = rawData.map((row, index) => {
-        return {
-          id: 'chem-' + Date.now() + '-' + index,
-          type: 'chemical',
-          name: row['ชื่อสารเคมี'] || row['Name'] || '',
-          formula: row['สูตรเคมี'] || row['Formula'] || '',
-          quantity: parseFloat(row['จำนวน'] || row['Quantity'] || 0),
-          unit: row['หน่วย'] || row['Unit'] || 'หน่วย',
-          location: row['สถานที่เก็บ'] || row['Location'] || '-',
-          minStock: parseFloat(row['สต็อกขั้นต่ำ'] || row['MinStock'] || 0),
-          createdAt: new Date().toISOString()
-        };
-      }).filter(item => item.name); // เอาเฉพาะที่มีชื่อ
+  function renderReportsSection() {
+    const allBorrows = allData.filter(item => item.type === 'borrow');
+    const chemicals = allData.filter(item => item.type === 'chemical');
+    const equipment = allData.filter(item => item.type === 'equipment');
+    const users = allData.filter(item => item.type === 'user');
+    const allIssueReports = allData.filter(item => item.type === 'issue_report');
 
-      if (chemicals.length === 0) {
-        showErrorMessage('ไม่พบข้อมูลในไฟล์ หรือรูปแบบไม่ถูกต้อง');
-        return;
-      }
+    const validUsernames = new Set(users.map(u => u.username));
+    const validItemIds = new Set([...chemicals.map(c => c.__backendId), ...equipment.map(e => e.__backendId)]);
 
-      // ยืนยันการนำเข้า
-      if(!modalElement) modalElement = document.getElementById('modal');
-      modalElement.innerHTML = `
-        <div class="modal-content">
-          <div class="modal-header"><h3>ยืนยันการนำเข้าข้อมูล</h3><button class="close-btn" onclick="closeModal()">×</button></div>
-          <div style="text-align: center; padding: 20px;">
-            <div style="font-size: 40px; margin-bottom: 10px;">📥</div>
-            <p>พบข้อมูลจำนวน <strong>${chemicals.length}</strong> รายการ</p>
-            <p style="font-size: 13px; color: #6b7280;">ต้องการนำเข้าสู่ระบบหรือไม่?</p>
-          </div>
-          <div style="display: flex; gap: 10px; justify-content: center;">
-            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
-            <button class="btn btn-success" id="confirmImportBtn">ยืนยันการนำเข้า</button>
+    const validBorrows = allBorrows.filter(borrow => {
+        const userExists = validUsernames.has(borrow.borrower);
+        const itemExists = validItemIds.has(borrow.itemId);
+        return userExists && itemExists; 
+    });
+    
+    const validIssueReports = allIssueReports.filter(report => {
+        const userExists = validUsernames.has(report.reportedBy); 
+        const itemExists = validItemIds.has(report.itemId);
+        return userExists && itemExists;
+    });
+    
+    const issueReportsChemical = validIssueReports.filter(item => item.issueType === 'out_of_stock');
+    const issueReportsEquipment = validIssueReports.filter(item => item.issueType === 'damaged');
+
+    const borrowsByUser = validBorrows.reduce((acc, borrow) => {
+      const user = borrow.borrower;
+      if (!acc[user]) acc[user] = [];
+      acc[user].push(borrow);
+      return acc;
+    }, {});
+    
+    const sortedUsers = Object.keys(borrowsByUser).sort();
+    
+    return `
+      <div class="card">
+        <div class="academic-header"><h3>📈 รายงานการยืม-คืน (สรุปตามครู)</h3></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div class="search-box" style="flex: 1; margin: 0;"><input type="text" id="reportSearch" placeholder="🔍 ค้นหา (ชื่อครู, รายการยืม)..." onkeyup="filterReports()"></div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-success btn-small" onclick="downloadBorrowReport('excel')">📊 Excel (ทั้งหมด)</button>
+            <button class="btn btn-danger btn-small" onclick="downloadBorrowReport('pdf')">📄 PDF (ทั้งหมด)</button>
           </div>
         </div>
-      `;
-      modalElement.classList.add('active');
-
-      document.getElementById('confirmImportBtn').onclick = function() {
-        const btn = this;
-        btn.disabled = true;
-        btn.textContent = 'กำลังนำเข้า...';
-        
-        // ส่งข้อมูลทั้งหมดไปที่ Backend ทีเดียว (Batch Create)
-        callApi('batchCreate', chemicals)
-          .then(onCrudSuccess)
-          .catch(onFailure);
-      };
-    };
-    reader.readAsArrayBuffer(file);
-    event.target.value = ''; // เคลียร์ค่า input
+        <div id="reportAccordionContainer">
+          ${sortedUsers.length > 0 ? sortedUsers.map(user => {
+            const userBorrows = borrowsByUser[user];
+            const pendingCount = userBorrows.filter(b => b.status === 'pending').length;
+            const safeId = 'report-user-' + user.replace(/[^a-zA-Z0-9]/g, ''); 
+            return `
+              <div class="report-group-card" data-searchable-text="${user.toLowerCase()} ${userBorrows.map(b => b.itemName).join(' ').toLowerCase()}">
+                <div class="report-group-header" onclick="toggleBorrowDetail('${safeId}')">
+                  <h4><span style="font-size: 20px;">👨‍🏫</span> ${user}</h4>
+                  <div class="stats"><span>รวม: ${userBorrows.length} รายการ</span> | <span style="color: ${pendingCount > 0 ? '#d97706' : '#059669'}; font-weight: 600;">ค้าง: ${pendingCount} รายการ</span></div>
+                  <div class="toggle-icon">▸</div>
+                </div>
+                <div class="report-group-details" id="${safeId}" style="display: none;">
+                  <div class="table-container academic-table">
+                    <table>
+                      <thead><tr><th>รายการ</th><th>ประเภท</th><th>จำนวน</th><th>ห้อง</th><th>วันที่ยืม</th><th>วันที่คืน</th><th>สถานะ</th></tr></thead>
+                      <tbody>
+                        ${userBorrows.map(item => `
+                          <tr>
+                            <td><strong>${item.itemName}</strong></td>
+                            <td>${item.itemType === 'chemical' ? 'สารเคมี' : 'อุปกรณ์'}</td>
+                            <td>${item.amount}</td>
+                            <td>${item.room}</td>
+                            <td>${new Date(item.borrowDate).toLocaleDateString('th-TH')}</td>
+                            <td>${item.returnDate ? new Date(item.returnDate).toLocaleDateString('th-TH') : '-'}</td>
+                            <td><span class="badge ${item.status === 'returned' ? 'badge-returned' : 'badge-pending'}">${item.status === 'returned' ? 'คืนแล้ว' : 'ยังไม่คืน'}</span></td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('') : '<div class="empty-state"><div class="empty-state-icon">📈</div>ยังไม่มีข้อมูลการยืม-คืน</div>'}
+        </div>
+      </div>
+      <div class="card"><div class="academic-header"><h3>📋 รายงานสารเคมีและอุปกรณ์</h3></div>${renderInventoryReportStats(chemicals, equipment)}</div>
+      <div class="card"><div class="academic-header"><h3>🧬 รายงานสารเคมีที่หมด</h3></div>${renderIssueReportTable(issueReportsChemical, 'สารเคมี', 'แก้ไขแล้ว', 'รอดำเนินการ', 'เติมสต็อก', 'แก้ไขแล้ว')}</div>
+      <div class="card"><div class="academic-header"><h3>🔬 รายงานอุปกรณ์ที่ชำรุด</h3></div>${renderIssueReportTable(issueReportsEquipment, 'อุปกรณ์', 'ซ่อมแล้ว', 'รอซ่อม', 'ซ่อมเสร็จ', 'ดูรายละเอียด')}</div>
+    `;
   }
 
   function renderInventoryReportStats(chemicals, equipment) {
@@ -691,29 +758,1237 @@
         <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bfdbfe; padding: 16px; border-radius: 12px;">
           <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px;">📊 ดาวน์โหลด (รายการทั้งหมด)</h4>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 14px; font-weight: 500;">🧬 สารเคมี:</span><div><button class="btn btn-success btn-small" onclick="downloadInventoryReport('all_chemicals', 'excel')">Excel</button><button class="btn btn-info btn-small" onclick="downloadInventoryReport('all_chemicals', 'doc')">Word</button><button class="btn btn-danger btn-small" onclick="downloadInventoryReport('all_chemicals', 'pdf')">PDF</button></div></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cce7fe; padding-top: 10px;"><span style="font-size: 14px; font-weight: 500;">🔬 อุปกรณ์:</span><div><button class="btn btn-success btn-small" onclick="downloadInventoryReport('all_equipment', 'excel')">Excel</button><button class="btn btn-info btn-small" onclick="downloadInventoryReport('all_equipment', 'doc')">Word</button><button class="btn btn-danger btn-small" onclick="downloadInventoryReport('all_equipment', 'pdf')">PDF</button></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 14px; font-weight: 500;">🧬 สารเคมี:</span><div><button class="btn btn-success btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('all_chemicals', 'excel')">📊 Excel</button><button class="btn btn-danger btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('all_chemicals', 'pdf')">📄 PDF</button></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cce7fe; padding-top: 10px;"><span style="font-size: 14px; font-weight: 500;">🔬 อุปกรณ์:</span><div><button class="btn btn-success btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('all_equipment', 'excel')">📊 Excel</button><button class="btn btn-danger btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('all_equipment', 'pdf')">📄 PDF</button></div></div>
           </div>
         </div>
         <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; padding: 16px; border-radius: 12px;">
           <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px;">✅ ดาวน์โหลด (รายการคงเหลือ)</h4>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 14px; font-weight: 500;">🧬 สารเคมี:</span><div><button class="btn btn-success btn-small" onclick="downloadInventoryReport('available_chemicals', 'excel')">Excel</button><button class="btn btn-info btn-small" onclick="downloadInventoryReport('available_chemicals', 'doc')">Word</button><button class="btn btn-danger btn-small" onclick="downloadInventoryReport('available_chemicals', 'pdf')">PDF</button></div></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #d1f7e1; padding-top: 10px;"><span style="font-size: 14px; font-weight: 500;">🔬 อุปกรณ์:</span><div><button class="btn btn-success btn-small" onclick="downloadInventoryReport('available_equipment', 'excel')">Excel</button><button class="btn btn-info btn-small" onclick="downloadInventoryReport('available_equipment', 'doc')">Word</button><button class="btn btn-danger btn-small" onclick="downloadInventoryReport('available_equipment', 'pdf')">PDF</button></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 14px; font-weight: 500;">🧬 สารเคมี:</span><div><button class="btn btn-success btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('available_chemicals', 'excel')">📊 Excel</button><button class="btn btn-danger btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('available_chemicals', 'pdf')">📄 PDF</button></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #d1f7e1; padding-top: 10px;"><span style="font-size: 14px; font-weight: 500;">🔬 อุปกรณ์:</span><div><button class="btn btn-success btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('available_equipment', 'excel')">📊 Excel</button><button class="btn btn-danger btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('available_equipment', 'pdf')">📄 PDF</button></div></div>
           </div>
         </div>
         <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; padding: 16px; border-radius: 12px;">
           <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px;">⚠️ ดาวน์โหลด (ควรสั่งเพิ่ม)</h4>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 14px; font-weight: 500;">🧬 สารเคมี:</span><div><button class="btn btn-success btn-small" onclick="downloadInventoryReport('reorder_chemicals', 'excel')">Excel</button><button class="btn btn-info btn-small" onclick="downloadInventoryReport('reorder_chemicals', 'doc')">Word</button><button class="btn btn-danger btn-small" onclick="downloadInventoryReport('reorder_chemicals', 'pdf')">PDF</button></div></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f6e0b7; padding-top: 10px;"><span style="font-size: 14px; font-weight: 500;">🔬 อุปกรณ์:</span><div><button class="btn btn-success btn-small" onclick="downloadInventoryReport('reorder_equipment', 'excel')">Excel</button><button class="btn btn-info btn-small" onclick="downloadInventoryReport('reorder_equipment', 'doc')">Word</button><button class="btn btn-danger btn-small" onclick="downloadInventoryReport('reorder_equipment', 'pdf')">PDF</button></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 14px; font-weight: 500;">🧬 สารเคมี:</span><div><button class="btn btn-success btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('reorder_chemicals', 'excel')">📊 Excel</button><button class="btn btn-danger btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('reorder_chemicals', 'pdf')">📄 PDF</button></div></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f6e0b7; padding-top: 10px;"><span style="font-size: 14px; font-weight: 500;">🔬 อุปกรณ์:</span><div><button class="btn btn-success btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('reorder_equipment', 'excel')">📊 Excel</button><button class="btn btn-danger btn-small" style="margin-left: 5px;" onclick="downloadInventoryReport('reorder_equipment', 'pdf')">📄 PDF</button></div></div>
           </div>
         </div>
       </div>
     `;
   }
+  
+  function renderIssueReportTable(reports, itemLabel, resolvedText, pendingText, primaryActionText, secondaryActionText) {
+    const isChemical = itemLabel === 'สารเคมี';
+    const amountLabel = isChemical ? 'จำนวนที่แจ้ง' : 'จำนวนชำรุด';
+    return `
+      <div style="margin-bottom: 20px;"><div class="info-box"><p>⚠️ รายงาน${itemLabel}จากครู: ${reports.length} รายการ</p></div></div>
+      <div class="table-container academic-table">
+        <table>
+          <thead><tr><th>ชื่อ${itemLabel}</th><th>ครูที่แจ้ง</th><th>วันที่แจ้ง</th><th>${amountLabel}</th><th>หมายเหตุ</th><th>สถานะ</th><th>การจัดการ</th></tr></thead>
+          <tbody>
+            ${reports.length > 0 ? reports.map(report => {
+              const item = allData.find(i => i.__backendId === report.itemId);
+              const amount = isChemical ? report.originalAmount : report.damagedAmount;
+              const primaryAction = isChemical 
+                ? `onclick='resolveChemicalIssue(${JSON.stringify(report)}, ${JSON.stringify(item)})'`
+                : `onclick='resolveEquipmentIssue(${JSON.stringify(report)}, ${JSON.stringify(item)})'`;
+              const secondaryAction = isChemical
+                ? `onclick='markIssueResolved(${JSON.stringify(report)})'`
+                : `onclick='viewEquipmentDetails("${report.itemId}")'`;
+              return `
+                <tr>
+                  <td><strong>${report.itemName}</strong></td>
+                  <td>${report.reportedBy}</td>
+                  <td>${new Date(report.reportDate).toLocaleDateString('th-TH')}</td>
+                  <td><span class="badge ${isChemical ? 'badge-pending' : 'badge-low'}">${amount}</span></td>
+                  <td>${report.note || '-'}</td>
+                  <td><span class="badge ${report.status === 'resolved' ? 'badge-returned' : 'badge-pending'}">${report.status === 'resolved' ? resolvedText : pendingText}</span></td>
+                  <td>
+                    ${report.status !== 'resolved' ? `
+                      <button class="btn btn-success btn-small" ${primaryAction}>${primaryActionText}</button>
+                      <button class="btn btn-secondary btn-small" ${secondaryAction}>${secondaryActionText}</button>
+                    ` : '<span style="color: #9ca3af;">-</span>'}
+                  </td>
+                </tr>
+              `}).join('') : `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">✅</div>ไม่มีรายงาน${itemLabel}</td></tr>`
+            }
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
 
-  // ... (ฟังก์ชันอื่นๆ renderEquipmentSection, renderUsersSection, renderReportsSection, renderIssueReportTable, renderTeacherDashboard คงเดิม) ...
+  function renderTeacherDashboard(title, logoUrl) {
+    const chemicals = allData.filter(item => item.type === 'chemical');
+    const equipment = allData.filter(item => item.type === 'equipment');
+    const myBorrows = allData.filter(item => item.type === 'borrow' && item.borrower === currentUser.username);
+    const pendingBorrows = myBorrows.filter(item => item.status === 'pending');
+    const myChemicalBorrows = myBorrows.filter(item => item.itemType === 'chemical');
+    const myEquipmentBorrows = myBorrows.filter(item => item.itemType === 'equipment');
+
+    appElement.innerHTML = `
+      <div class="container">
+        <div class="header">
+          <div class="header-left">
+            <div class="header-logo">${logoUrl ? `<img src="${logoUrl}" alt="Logo">` : '🧪'}</div>
+            <div class="header-info"><h2 class="system-title">${title}</h2><p>ครูผู้ใช้งาน: ${currentUser.displayName}</p></div>
+          </div>
+          <!-- ✅ เพิ่ม btn-logout ที่นี่ -->
+          <div class="header-right"><button class="btn btn-secondary btn-small btn-logout" onclick="logout()">ออกจากระบบ</button></div>
+        </div>
+        <div class="nav-tabs">
+          <button class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')">🏠 หน้าหลัก</button>
+          <button class="nav-tab ${currentTab === 'borrow' ? 'active' : ''}" onclick="switchTab('borrow')">📝 จัดการการยืม</button>
+          <button class="nav-tab ${currentTab === 'history' ? 'active' : ''}" onclick="switchTab('history')">📖 ประวัติของฉัน</button>
+        </div>
+        <div id="dashboardSection" class="content-section ${currentTab === 'dashboard' ? 'active' : ''}">
+          <div class="stats-grid">
+            <div class="stat-card"><h3>สารเคมีพร้อมใช้</h3><p class="number">${chemicals.length}</p></div>
+            <div class="stat-card"><h3>อุปกรณ์พร้อมใช้</h3><p class="number">${equipment.length}</p></div>
+            <div class="stat-card"><h3>รายการที่ยืม</h3><p class="number">${myBorrows.length}</p></div>
+            <div class="stat-card"><h3>ยังไม่คืน</h3><p class="number" style="color: #d97706;">${pendingBorrows.length}</p></div>
+          </div>
+          <div class="card">
+            <div class="academic-header"><h3>🧬 สารเคมีที่พร้อมใช้งาน</h3></div>
+            <div class="search-box"><input type="text" id="chemicalSearchTeacher" placeholder="🔍 ค้นหาสารเคมี..." onkeyup="filterTeacherChemicals()"></div>
+            <div class="table-container academic-table">
+              <table id="teacherChemicalsTable">
+                <thead><tr><th>ชื่อสารเคมี</th><th>สูตรเคมี</th><th>จำนวนคงเหลือ</th><th>สถานที่เก็บ</th><th>การดำเนินการ</th></tr></thead>
+                <tbody>
+                  ${chemicals.length > 0 ? chemicals.map(item => `
+                    <tr>
+                      <td><strong>${item.name}</strong></td>
+                      <td>${item.formula || '-'}</td>
+                      <td><span class="badge ${item.quantity <= (item.minStock || 0) ? 'badge-low' : 'badge-normal'}">${item.quantity} ${item.unit}</span></td>
+                      <td>${item.location}</td>
+                      <td>${item.quantity > 0 ? `<button class="btn btn-primary btn-small" onclick='quickBorrowChemical(${JSON.stringify(item)})'>ยืม</button>` : `<button class="btn btn-danger btn-small" onclick='reportOutOfStock(${JSON.stringify(item)})'>แจ้งสารเคมีหมด</button>`}</td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="5" class="empty-state">ยังไม่มีข้อมูลสารเคมี</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="academic-header"><h3>🔬 อุปกรณ์ที่พร้อมใช้งาน</h3></div>
+            <div class="search-box"><input type="text" id="equipmentSearchTeacher" placeholder="🔍 ค้นหาอุปกรณ์..." onkeyup="filterTeacherEquipment()"></div>
+            <div class="table-container academic-table">
+              <table id="teacherEquipmentTable">
+                <thead><tr><th>ชื่ออุปกรณ์</th><th>จำนวนคงเหลือ</th><th>สถานที่เก็บ</th><th>การดำเนินการ</th></tr></thead>
+                <tbody>
+                  ${equipment.length > 0 ? equipment.map(item => `
+                    <tr>
+                      <td><strong>${item.name}</strong></td>
+                      <td><span class="badge ${item.quantity <= (item.minStock || 0) ? 'badge-low' : 'badge-normal'}">${item.quantity} ${item.unit}</span></td>
+                      <td>${item.location}</td>
+                      <td>${item.quantity > 0 ? `<button class="btn btn-primary btn-small" onclick='quickBorrowEquipment(${JSON.stringify(item)})'>ยืม</button>` : `<button class="btn btn-danger btn-small" onclick='reportDamaged(${JSON.stringify(item)})'>แจ้งอุปกรณ์ชำรุด</button>`}</td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="4" class="empty-state">ยังไม่มีข้อมูลอุปกรณ์</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="borrowSection" class="content-section ${currentTab === 'borrow' ? 'active' : ''}">
+          <div class="card">
+            <div class="academic-header"><h3>🧬 จัดการการยืมสารเคมี</h3></div>
+            <div class="table-container academic-table">
+              <table>
+                <thead><tr><th>รายการ</th><th>จำนวน</th><th>ห้อง</th><th>วันที่ยืม</th><th>วันที่คืน</th><th>สถานะ</th><th>การจัดการ</th></tr></thead>
+                <tbody>
+                  ${myChemicalBorrows.length > 0 ? myChemicalBorrows.map(item => `
+                    <tr>
+                      <td><strong>${item.itemName}</strong>${item.issueReported ? '<br><small style="color: #d97706;">⚠️ มีการแจ้งปัญหา</small>' : ''}</td>
+                      <td>${item.amount}${item.issueReported ? `<br><small style="color: #6b7280;">เดิม: ${(parseFloat(item.amount) + parseFloat(item.issueAmount)).toFixed(2)}</small>` : ''}</td>
+                      <td>${item.room}</td>
+                      <td>${new Date(item.borrowDate).toLocaleDateString('th-TH')}</td>
+                      <td>${item.returnDate ? new Date(item.returnDate).toLocaleDateString('th-TH') : '-'}</td>
+                      <td><span class="badge ${item.status === 'returned' ? 'badge-returned' : 'badge-pending'}">${item.status === 'returned' ? 'คืนแล้ว' : 'ยังไม่คืน'}</span></td>
+                      <td>${item.status === 'pending' ? `<button class="btn btn-secondary btn-small" onclick='editBorrow(${JSON.stringify(item)})'>แก้ไข</button><button class="btn btn-success btn-small" onclick='returnItem(${JSON.stringify(item)})'>คืน</button>${!item.issueReported ? `<button class="btn btn-danger btn-small" onclick='reportIssueFromBorrow(${JSON.stringify(item)})'>แจ้งปัญหา</button>` : ''}` : '<span style="color: #9ca3af;">-</span>'}</td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">📝</div>ยังไม่มีข้อมูลการยืมสารเคมี</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="academic-header"><h3>🔬 จัดการการยืมอุปกรณ์</h3></div>
+            <div class="table-container academic-table">
+              <table>
+                <thead><tr><th>รายการ</th><th>จำนวน</th><th>ห้อง</th><th>วันที่ยืม</th><th>วันที่คืน</th><th>สถานะ</th><th>การจัดการ</th></tr></thead>
+                <tbody>
+                  ${myEquipmentBorrows.length > 0 ? myEquipmentBorrows.map(item => `
+                    <tr>
+                      <td><strong>${item.itemName}</strong>${item.issueReported ? '<br><small style="color: #d97706;">⚠️ มีการแจ้งปัญหา</small>' : ''}</td>
+                      <td>${item.amount}${item.issueReported ? `<br><small style="color: #6b7280;">เดิม: ${(parseFloat(item.amount) + parseFloat(item.issueAmount)).toFixed(0)}</small>` : ''}</td>
+                      <td>${item.room}</td>
+                      <td>${new Date(item.borrowDate).toLocaleDateString('th-TH')}</td>
+                      <td>${item.returnDate ? new Date(item.returnDate).toLocaleDateString('th-TH') : '-'}</td>
+                      <td><span class="badge ${item.status === 'returned' ? 'badge-returned' : 'badge-pending'}">${item.status === 'returned' ? 'คืนแล้ว' : 'ยังไม่คืน'}</span></td>
+                      <td>${item.status === 'pending' ? `<button class="btn btn-secondary btn-small" onclick='editBorrow(${JSON.stringify(item)})'>แก้ไข</button><button class="btn btn-success btn-small" onclick='returnItem(${JSON.stringify(item)})'>คืน</button>${!item.issueReported ? `<button class="btn btn-danger btn-small" onclick='reportIssueFromBorrow(${JSON.stringify(item)})'>แจ้งปัญหา</button>` : ''}` : '<span style="color: #9ca3af;">-</span>'}</td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">📝</div>ยังไม่มีข้อมูลการยืมอุปกรณ์</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="historySection" class="content-section ${currentTab === 'history' ? 'active' : ''}">
+          <div class="card">
+            <div class="academic-header"><h3>📖 ประวัติการยืมสารเคมี</h3></div>
+            <div class="table-container academic-table">
+              <table>
+                <thead><tr><th>รายการ</th><th>จำนวน</th><th>ห้อง</th><th>วันที่ยืม</th><th>วันที่คืน</th><th>สถานะ</th></tr></thead>
+                <tbody>
+                  ${myChemicalBorrows.length > 0 ? myChemicalBorrows.map(item => `<tr><td><strong>${item.itemName}</strong></td><td>${item.amount}</td><td>${item.room}</td><td>${new Date(item.borrowDate).toLocaleDateString('th-TH')}</td><td>${item.returnDate ? new Date(item.returnDate).toLocaleDateString('th-TH') : '-'}</td><td><span class="badge ${item.status === 'returned' ? 'badge-returned' : 'badge-pending'}">${item.status === 'returned' ? 'คืนแล้ว' : 'ยังไม่คืน'}</span></td></tr>`).join('') : '<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">📖</div>ยังไม่มีประวัติการยืมสารเคมี</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="academic-header"><h3>📖 ประวัติการยืมอุปกรณ์</h3></div>
+            <div class="table-container academic-table">
+              <table>
+                <thead><tr><th>รายการ</th><th>จำนวน</th><th>ห้อง</th><th>วันที่ยืม</th><th>วันที่คืน</th><th>สถานะ</th></tr></thead>
+                <tbody>
+                  ${myEquipmentBorrows.length > 0 ? myEquipmentBorrows.map(item => `<tr><td><strong>${item.itemName}</strong></td><td>${item.amount}</td><td>${item.room}</td><td>${new Date(item.borrowDate).toLocaleDateString('th-TH')}</td><td>${item.returnDate ? new Date(item.returnDate).toLocaleDateString('th-TH') : '-'}</td><td><span class="badge ${item.status === 'returned' ? 'badge-returned' : 'badge-pending'}">${item.status === 'returned' ? 'คืนแล้ว' : 'ยังไม่คืน'}</span></td></tr>`).join('') : '<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">📖</div>ยังไม่มีประวัติการยืมอุปกรณ์</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer">พัฒนาระบบโดย ครูอานนท์ เมืองแก้ว</div>
+      </div>
+      <div id="modal" class="modal"></div>
+    `;
+    modalElement = document.getElementById('modal');
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    renderDashboard();
+  }
+
+  function logout() {
+    currentUser = null;
+    currentView = 'login';
+    currentTab = 'dashboard';
+    // ไม่ลบ allData เพื่อให้ Login ใหม่ได้ทันที
+    renderLogin();
+  }
+  
+  function closeModal() {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    if(modalElement) {
+        modalElement.classList.remove('active');
+        setTimeout(() => {
+             if (!modalElement.classList.contains('active')) {
+                 modalElement.innerHTML = '';
+             }
+        }, 300);
+    }
+  }
+  
+  function toggleBorrowDetail(elementId) {
+    const detailElement = document.getElementById(elementId);
+    const headerElement = document.querySelector(`[onclick="toggleBorrowDetail('${elementId}')"]`);
+    if (detailElement) {
+      if (detailElement.style.display === 'none' || detailElement.style.display === '') {
+        detailElement.style.display = 'block';
+        if (headerElement) headerElement.classList.add('open');
+      } else {
+        detailElement.style.display = 'none';
+        if (headerElement) headerElement.classList.remove('open');
+      }
+    }
+  }
+
+  window.onclick = function(event) {
+    if (event.target === modalElement) {
+      closeModal();
+    }
+  };
+
+  function downloadUserReport() {
+    const users = allData.filter(item => item.type === 'user' && item.role === 'teacher');
+    if (users.length === 0) {
+        showErrorMessage('ไม่มีข้อมูลผู้ใช้งานสำหรับดาวน์โหลด');
+        return;
+    }
+    const title = 'รายงานข้อมูลผู้ใช้งาน (ครู)';
+    const filename = `รายงานผู้ใช้งาน_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}`;
+    const reportData = users.map(user => ({ 'ชื่อ-นามสกุล': (`${user.firstName || ''} ${user.lastName || ''}`).trim() || '-', 'ชื่อผู้ใช้': user.username, 'รหัสผ่าน': user.password }));
+    const headers = ['ชื่อ-นามสกุล', 'ชื่อผู้ใช้', 'รหัสผ่าน'];
+    downloadPDF(reportData, title, filename, headers);
+  }
+
+  function openAddChemicalModal() {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>เพิ่มสารเคมีใหม่</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="addChemicalForm">
+          <div class="form-group"><label for="chemName">ชื่อสารเคมี *</label><input type="text" id="chemName" required placeholder="เช่น โซเดียมคลอไรด์"></div>
+          <div class="form-group"><label for="chemFormula">สูตรเคมี</label><input type="text" id="chemFormula" placeholder="เช่น NaCl"></div>
+          <div class="form-row">
+            <div class="form-group"><label for="chemQuantity">จำนวน *</label><input type="number" id="chemQuantity" required min="0" step="0.01" placeholder="0.00"></div>
+            <div class="form-group"><label for="chemUnit">หน่วย *</label><select id="chemUnit" required><option value="mL">mL</option><option value="L">L</option><option value="g">g</option><option value="kg">kg</option><option value="ขวด">ขวด</option><option value="อัน">อัน</option><option value="ชิ้น">ชิ้น</option><option value="หลอด">หลอด</option><option value="แท่ง">แท่ง</option></select></div>
+          </div>
+          <div class="form-group"><label for="chemLocation">สถานที่จัดเก็บ *</label><input type="text" id="chemLocation" required placeholder="เช่น ตู้เก็บสารเคมี A-1"></div>
+          <div class="form-group"><label for="chemMinStock">สต็อกขั้นต่ำ</label><input type="number" id="chemMinStock" min="0" step="0.01" value="0" placeholder="0.00"></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกข้อมูล">บันทึกข้อมูล</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('addChemicalForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const data = {
+        id: 'chem-' + Date.now(),
+        type: 'chemical',
+        name: document.getElementById('chemName').value,
+        formula: document.getElementById('chemFormula').value,
+        quantity: parseFloat(document.getElementById('chemQuantity').value),
+        unit: document.getElementById('chemUnit').value,
+        location: document.getElementById('chemLocation').value,
+        minStock: parseFloat(document.getElementById('chemMinStock').value) || 0,
+        createdAt: new Date().toISOString()
+      };
+      createItem(data);
+    });
+  }
+  
+  function editChemical(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>แก้ไขข้อมูลสารเคมี</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="editChemicalForm">
+          <div class="form-group"><label for="chemName">ชื่อสารเคมี *</label><input type="text" id="chemName" value="${item.name}" required></div>
+          <div class="form-group"><label for="chemFormula">สูตรเคมี</label><input type="text" id="chemFormula" value="${item.formula || ''}"></div>
+          <div class="form-row">
+            <div class="form-group"><label for="chemQuantity">จำนวน *</label><input type="number" id="chemQuantity" value="${item.quantity}" required min="0" step="0.01"></div>
+            <div class="form-group"><label for="chemUnit">หน่วย *</label><select id="chemUnit" required><option value="mL" ${item.unit === 'mL' ? 'selected' : ''}>mL</option><option value="L" ${item.unit === 'L' ? 'selected' : ''}>L</option><option value="g" ${item.unit === 'g' ? 'selected' : ''}>g</option><option value="kg" ${item.unit === 'kg' ? 'selected' : ''}>kg</option><option value="ขวด" ${item.unit === 'ขวด' ? 'selected' : ''}>ขวด</option><option value="อัน" ${item.unit === 'อัน' ? 'selected' : ''}>อัน</option><option value="ชิ้น" ${item.unit === 'ชิ้น' ? 'selected' : ''}>ชิ้น</option><option value="หลอด" ${item.unit === 'หลอด' ? 'selected' : ''}>หลอด</option><option value="แท่ง" ${item.unit === 'แท่ง' ? 'selected' : ''}>แท่ง</option></select></div>
+          </div>
+          <div class="form-group"><label for="chemLocation">สถานที่จัดเก็บ *</label><input type="text" id="chemLocation" value="${item.location}" required></div>
+          <div class="form-group"><label for="chemMinStock">สต็อกขั้นต่ำ</label><input type="number" id="chemMinStock" value="${item.minStock || 0}" min="0" step="0.01"></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกการแก้ไข">บันทึกการแก้ไข</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('editChemicalForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const updatedItem = {
+        ...item,
+        name: document.getElementById('chemName').value,
+        formula: document.getElementById('chemFormula').value,
+        quantity: parseFloat(document.getElementById('chemQuantity').value),
+        unit: document.getElementById('chemUnit').value,
+        location: document.getElementById('chemLocation').value,
+        minStock: parseFloat(document.getElementById('chemMinStock').value) || 0
+      };
+      updateItem(updatedItem);
+    });
+  }
+
+  function openAddEquipmentModal() {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>เพิ่มอุปกรณ์ใหม่</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="addEquipmentForm">
+          <div class="form-group"><label for="equipName">ชื่ออุปกรณ์ *</label><input type="text" id="equipName" required placeholder="เช่น บีกเกอร์"></div>
+          <div class="form-row">
+            <div class="form-group"><label for="equipQuantity">จำนวน *</label><input type="number" id="equipQuantity" required min="0" step="1" placeholder="0"></div>
+            <div class="form-group"><label for="equipUnit">หน่วย *</label><select id="equipUnit" required><option value="อัน">อัน</option><option value="ชิ้น">ชิ้น</option><option value="เครื่อง">เครื่อง</option><option value="ชุด">ชุด</option><option value="หลอด">หลอด</option><option value="แผ่น">แผ่น</option></select></div>
+          </div>
+          <div class="form-group"><label for="equipLocation">สถานที่จัดเก็บ *</label><input type="text" id="equipLocation" required placeholder="เช่น ตู้เก็บอุปกรณ์ B-2"></div>
+          <div class="form-group"><label for="equipMinStock">สต็อกขั้นต่ำ</label><input type="number" id="equipMinStock" min="0" step="1" value="0" placeholder="0"></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกข้อมูล">บันทึกข้อมูล</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('addEquipmentForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const data = {
+        id: 'equip-' + Date.now(),
+        type: 'equipment',
+        name: document.getElementById('equipName').value,
+        quantity: parseInt(document.getElementById('equipQuantity').value),
+        unit: document.getElementById('equipUnit').value,
+        location: document.getElementById('equipLocation').value,
+        minStock: parseInt(document.getElementById('equipMinStock').value) || 0,
+        createdAt: new Date().toISOString()
+      };
+      createItem(data);
+    });
+  }
+
+  function editEquipment(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>แก้ไขข้อมูลอุปกรณ์</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="editEquipmentForm">
+          <div class="form-group"><label for="equipName">ชื่ออุปกรณ์ *</label><input type="text" id="equipName" value="${item.name}" required></div>
+          <div class="form-row">
+            <div class="form-group"><label for="equipQuantity">จำนวน *</label><input type="number" id="equipQuantity" value="${item.quantity}" required min="0" step="1"></div>
+            <div class="form-group"><label for="equipUnit">หน่วย *</label><select id="equipUnit" required><option value="อัน" ${item.unit === 'อัน' ? 'selected' : ''}>อัน</option><option value="ชิ้น" ${item.unit === 'ชิ้น' ? 'selected' : ''}>ชิ้น</option><option value="เครื่อง" ${item.unit === 'เครื่อง' ? 'selected' : ''}>เครื่อง</option><option value="ชุด" ${item.unit === 'ชุด' ? 'selected' : ''}>ชุด</option><option value="หลอด" ${item.unit === 'หลอด' ? 'selected' : ''}>หลอด</option><option value="แผ่น" ${item.unit === 'แผ่น' ? 'selected' : ''}>แผ่น</option></select></div>
+          </div>
+          <div class="form-group"><label for="equipLocation">สถานที่จัดเก็บ *</label><input type="text" id="equipLocation" value="${item.location}" required></div>
+          <div class="form-group"><label for="equipMinStock">สต็อกขั้นต่ำ</label><input type="number" id="equipMinStock" value="${item.minStock || 0}" min="0" step="1"></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกการแก้ไข">บันทึกการแก้ไข</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('editEquipmentForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const updatedItem = {
+        ...item,
+        name: document.getElementById('equipName').value,
+        quantity: parseInt(document.getElementById('equipQuantity').value),
+        unit: document.getElementById('equipUnit').value,
+        location: document.getElementById('equipLocation').value,
+        minStock: parseInt(document.getElementById('equipMinStock').value) || 0
+      };
+      updateItem(updatedItem);
+    });
+  }
+
+  function openAddUserModal() {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>เพิ่มผู้ใช้งานใหม่</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="addUserForm">
+          <div class="form-row">
+            <div class="form-group"><label for="userFirstName">ชื่อ *</label><input type="text" id="userFirstName" required placeholder="เช่น สมชาย"></div>
+            <div class="form-group"><label for="userLastName">นามสกุล *</label><input type="text" id="userLastName" required placeholder="เช่น ใจดี"></div>
+          </div>
+          <div class="form-group"><label for="userName">ชื่อผู้ใช้งาน *</label><input type="text" id="userName" required placeholder="เช่น teacher01"></div>
+          <div class="form-group"><label for="userPassword">รหัสผ่าน *</label><div class="input-wrapper"><input type="password" id="userPassword" required placeholder="กรอกรหัสผ่าน"><span class="eye-icon" onclick="toggleModalPassword(event)">${SVG_EYE_SHOW}</span></div></div>
+          <div class="info-box"><p>💡 ผู้ใช้งานใหม่จะได้รับสิทธิ์ครูผู้ใช้งาน</p></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกข้อมูล">บันทึกข้อมูล</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('addUserForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const data = {
+        id: 'user-' + Date.now(),
+        type: 'user',
+        firstName: document.getElementById('userFirstName').value,
+        lastName: document.getElementById('userLastName').value,
+        username: document.getElementById('userName').value,
+        password: document.getElementById('userPassword').value,
+        role: 'teacher',
+        createdAt: new Date().toISOString()
+      };
+      createItem(data);
+    });
+  }
+
+  function editUser(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>แก้ไขข้อมูลผู้ใช้งาน</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="editUserForm">
+          <div class="form-row">
+            <div class="form-group"><label for="userFirstName">ชื่อ *</label><input type="text" id="userFirstName" value="${item.firstName || ''}" required></div>
+            <div class="form-group"><label for="userLastName">นามสกุล *</label><input type="text" id="userLastName" value="${item.lastName || ''}" required></div>
+          </div>
+          <div class="form-group"><label for="userName">ชื่อผู้ใช้งาน *</label><input type="text" id="userName" value="${item.username}" required></div>
+          <div class="form-group"><label for="userPassword">รหัสผ่าน *</label><div class="input-wrapper"><input type="password" id="userPassword" value="${item.password}" required><span class="eye-icon" onclick="toggleModalPassword(event)">${SVG_EYE_SHOW}</span></div></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกการแก้ไข">บันทึกการแก้ไข</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('editUserForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const updatedItem = {
+        ...item,
+        firstName: document.getElementById('userFirstName').value,
+        lastName: document.getElementById('userLastName').value,
+        username: document.getElementById('userName').value,
+        password: document.getElementById('userPassword').value
+      };
+      updateItem(updatedItem);
+    });
+  }
+
+  function toggleModalPassword(event) {
+    try {
+      const eyeIcon = event.currentTarget;
+      if (!eyeIcon) return;
+      const passwordInput = eyeIcon.previousElementSibling; 
+      if (!passwordInput || passwordInput.tagName !== 'INPUT') return;
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.innerHTML = SVG_EYE_HIDE;
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.innerHTML = SVG_EYE_SHOW;
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  function openBorrowModal() {
+    const chemicals = allData.filter(item => item.type === 'chemical' && item.quantity > 0);
+    const equipment = allData.filter(item => item.type === 'equipment' && item.quantity > 0);
+    const allItems = [...chemicals, ...equipment];
+
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>บันทึกการยืม</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="borrowForm">
+          <div class="form-group"><label for="borrowItem">เลือกรายการ *</label><select id="borrowItem" required onchange="updateMaxAmount()"><option value="">-- เลือกรายการที่ต้องการยืม --</option>${allItems.map(item => `<option value="${item.__backendId}" data-quantity="${item.quantity}" data-name="${item.name}" data-type="${item.type}" data-unit="${item.unit}">${item.name} (คงเหลือ: ${item.quantity} ${item.unit})</option>`).join('')}</select></div>
+          <div class="form-group"><label for="borrowAmount">จำนวนที่ยืม *</label<input type="number" id="borrowAmount" required min="0.01" step="any" placeholder="0.00"></div>
+          <div class="form-group"><label for="borrowRoom">ห้องที่ใช้งาน *</label><input type="text" id="borrowRoom" required placeholder="เช่น ห้องแล็บเคมี 1"></div>
+          <div class="info-box"><p>📝 กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนบันทึก</p></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกการยืม">บันทึกการยืม</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('borrowForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const select = document.getElementById('borrowItem');
+      if (!select.value) {
+          showErrorMessage('กรุณาเลือกรายการที่ต้องการยืม');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'บันทึกการยืม';
+          return;
+      }
+      const selectedOption = select.options[select.selectedIndex];
+      const itemId = select.value;
+      const amount = parseFloat(document.getElementById('borrowAmount').value);
+      const room = document.getElementById('borrowRoom').value;
+      const item = allData.find(i => i.__backendId === itemId);
+      
+      if (!item || item.quantity < amount) {
+        showErrorMessage('จำนวนที่ต้องการยืมมากกว่าจำนวนคงเหลือ');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'บันทึกการยืม';
+        return;
+      }
+
+      const borrowData = {
+        id: 'borrow-' + Date.now(),
+        type: 'borrow',
+        borrower: currentUser.username,
+        itemId: itemId,
+        itemName: selectedOption.dataset.name,
+        itemType: selectedOption.dataset.type,
+        amount: amount,
+        room: room,
+        borrowDate: new Date().toISOString(),
+        returnDate: null,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      
+      const updatedItem = { ...item, quantity: item.quantity - amount };
+
+      callApi('borrow', { borrowData, itemData: updatedItem }).then(onBorrowSuccess).catch(onFailure);
+    });
+  }
+
+  function updateMaxAmount() {
+    const select = document.getElementById('borrowItem');
+    const selectedOption = select.options[select.selectedIndex];
+    if (!select.value) return;
+    const maxQuantity = parseFloat(selectedOption.dataset.quantity) || 0;
+    const unit = selectedOption.dataset.type === 'chemical' ? '0.01' : '1';
+    const amountInput = document.getElementById('borrowAmount');
+    if (amountInput) {
+        amountInput.max = maxQuantity;
+        amountInput.step = unit;
+        amountInput.placeholder = `สูงสุด ${maxQuantity}`;
+    }
+  }
+
+  function quickBorrowChemical(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>ยืมสารเคมี: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="quickBorrowForm">
+          <div class="info-box"><p>📋 สารเคมี: ${item.name} (${item.formula || '-'}) | คงเหลือ: ${item.quantity} ${item.unit}</p></div>
+          <div class="form-group"><label for="borrowAmount">จำนวนที่ยืม *</label><input type="number" id="borrowAmount" required min="0.01" max="${item.quantity}" step="any" placeholder="สูงสุด ${item.quantity}"></div>
+          <div class="form-group"><label for="borrowRoom">ห้องที่ใช้งาน *</label><input type="text" id="borrowRoom" required placeholder="เช่น ห้องแล็บเคมี 1"></div>
+          <button type="submit" class="btn btn-primary" data-original-text="ยืมสารเคมี">ยืมสารเคมี</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('quickBorrowForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const amount = parseFloat(document.getElementById('borrowAmount').value);
+      const room = document.getElementById('borrowRoom').value;
+      if (amount > item.quantity) {
+        showErrorMessage('จำนวนที่ต้องการยืมมากกว่าจำนวนคงเหลือ');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'ยืมสารเคมี';
+        return;
+      }
+      const borrowData = {
+        id: 'borrow-' + Date.now(),
+        type: 'borrow',
+        borrower: currentUser.username,
+        itemId: item.__backendId,
+        itemName: item.name,
+        itemType: item.type,
+        amount: amount,
+        room: room,
+        borrowDate: new Date().toISOString(),
+        returnDate: null,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      const updatedItem = { ...item, quantity: item.quantity - amount };
+      
+      callApi('borrow', { borrowData, itemData: updatedItem }).then(onBorrowSuccess).catch(onFailure);
+    });
+  }
+
+  function quickBorrowEquipment(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>ยืมอุปกรณ์: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="quickBorrowForm">
+          <div class="info-box"><p>📋 อุปกรณ์: ${item.name} | คงเหลือ: ${item.quantity} ${item.unit}</p></div>
+          <div class="form-group"><label for="borrowAmount">จำนวนที่ยืม *</label><input type="number" id="borrowAmount" required min="1" max="${item.quantity}" step="any" placeholder="สูงสุด ${item.quantity}"></div>
+          <div class="form-group"><label for="borrowRoom">ห้องที่ใช้งาน *</label><input type="text" id="borrowRoom" required placeholder="เช่น ห้องแล็บเคมี 1"></div>
+          <button type="submit" class="btn btn-primary" data-original-text="ยืมอุปกรณ์">ยืมอุปกรณ์</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('quickBorrowForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const amount = parseInt(document.getElementById('borrowAmount').value);
+      const room = document.getElementById('borrowRoom').value;
+      if (amount > item.quantity) {
+        showErrorMessage('จำนวนที่ต้องการยืมมากกว่าจำนวนคงเหลือ');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'ยืมอุปกรณ์';
+        return;
+      }
+      const borrowData = {
+        id: 'borrow-' + Date.now(),
+        type: 'borrow',
+        borrower: currentUser.username,
+        itemId: item.__backendId,
+        itemName: item.name,
+        itemType: item.type,
+        amount: amount,
+        room: room,
+        borrowDate: new Date().toISOString(),
+        returnDate: null,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      const updatedItem = { ...item, quantity: item.quantity - amount };
+      
+      callApi('borrow', { borrowData, itemData: updatedItem }).then(onBorrowSuccess).catch(onFailure);
+    });
+  }
+
+  function reportOutOfStock(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>แจ้งสารเคมีหมด: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="reportOutOfStockForm">
+          <div class="info-box"><p>📋 สารเคมี: ${item.name} (${item.formula || '-'})</p></div>
+          <div class="form-group"><label for="outOfStockAmount">จำนวนที่หมด *</label><input type="number" id="outOfStockAmount" required min="0.01" step="0.01" placeholder="จำนวนที่หมด"></div>
+          <div class="form-group"><label for="outOfStockNote">หมายเหตุ/รายละเอียด</label><textarea id="outOfStockNote" rows="3" placeholder="อธิบายสถานการณ์ที่พบ..."></textarea></div>
+          <button type="submit" class="btn btn-danger" data-original-text="แจ้งสารเคมีหมด">แจ้งสารเคมีหมด</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('reportOutOfStockForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังแจ้ง...';
+      const outOfStockAmount = parseFloat(document.getElementById('outOfStockAmount').value);
+      const note = document.getElementById('outOfStockNote').value;
+      const issueReport = {
+        id: 'issue-' + Date.now(),
+        type: 'issue_report',
+        itemId: item.__backendId,
+        itemName: item.name,
+        itemType: item.type,
+        issueType: 'out_of_stock',
+        reportedBy: currentUser.username,
+        reportDate: new Date().toISOString(),
+        originalAmount: outOfStockAmount,
+        note: note,
+        status: 'reported',
+        createdAt: new Date().toISOString()
+      };
+      const updatedItem = {
+        ...item,
+        quantity: Math.max(0, item.quantity - outOfStockAmount)
+      };
+
+      callApi('create', issueReport)
+        .then(response => {
+          if (!response.success) return onFailure(new Error('Failed to create issue report'));
+          updateItem(updatedItem); 
+        })
+        .catch(onFailure);
+    });
+  }
+
+  function reportDamaged(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>แจ้งอุปกรณ์ชำรุด: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="reportDamagedForm">
+          <div class="info-box"><p>📋 อุปกรณ์: ${item.name} | คงเหลือ: ${item.quantity} ${item.unit}</p></div>
+          <div class="form-group"><label for="damagedAmount">จำนวนที่ชำรุด *</label><input type="number" id="damagedAmount" required min="1" step="1" placeholder="จำนวนที่ชำรุด"></div>
+          <div class="form-group"><label for="damagedNote">หมายเหตุ/รายละเอียดความเสียหาย</label><textarea id="damagedNote" rows="3" placeholder="อธิบายความเสียหายที่พบ..."></textarea></div>
+          <button type="submit" class="btn btn-danger" data-original-text="แจ้งอุปกรณ์ชำรุด">แจ้งอุปกรณ์ชำรุด</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('reportDamagedForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังแจ้ง...';
+      const damagedAmount = parseFloat(document.getElementById('damagedAmount').value);
+      const note = document.getElementById('damagedNote').value;
+      if (damagedAmount > item.quantity) {
+          showErrorMessage('จำนวนชำรุดมากกว่าจำนวนคงเหลือ');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'แจ้งอุปกรณ์ชำรุด';
+          return;
+      }
+      const issueReport = {
+        id: 'issue-' + Date.now(),
+        type: 'issue_report',
+        itemId: item.__backendId,
+        itemName: item.name,
+        itemType: item.type,
+        issueType: 'damaged',
+        reportedBy: currentUser.username,
+        reportDate: new Date().toISOString(),
+        damagedAmount: damagedAmount,
+        note: note,
+        status: 'reported',
+        createdAt: new Date().toISOString()
+      };
+      const updatedItem = {
+        ...item,
+        quantity: Math.max(0, item.quantity - damagedAmount),
+        damagedQuantity: (item.damagedQuantity || 0) + damagedAmount,
+        status: item.quantity - damagedAmount > 0 ? item.status : 'damaged',
+        damageNote: note
+      };
+
+      callApi('create', issueReport)
+        .then(response => {
+          if (!response.success) return onFailure(new Error('Failed to create issue report'));
+          updateItem(updatedItem);
+        })
+        .catch(onFailure);
+    });
+  }
+
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการแจ้งปัญหาจากรายการยืม
+  function reportIssueFromBorrow(borrowItem) {
+    const item = allData.find(i => i.__backendId === borrowItem.itemId);
+    if (!item) return;
+
+    if(!modalElement) modalElement = document.getElementById('modal');
+    const buttonText = item.type === 'chemical' ? 'แจ้งสารเคมีหมด' : 'แจ้งอุปกรณ์ชำรุด/เสียหาย';
+    const issueTypeText = item.type === 'chemical' ? 'สารเคมีหมด' : 'อุปกรณ์ชำรุด/เสียหาย';
+    const step = item.type === 'chemical' ? '0.01' : '1';
+            
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>${buttonText}: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="reportIssueForm">
+          <div class="info-box"><p>📋 รายการที่ยืม: ${item.name} | จำนวน: ${borrowItem.amount} ${item.unit}</p></div>
+          <div class="form-group"><label for="issueAmount">จำนวนที่${issueTypeText} *</label><input type="number" id="issueAmount" required min="${step}" max="${borrowItem.amount}" step="${step}" placeholder="จำนวนที่${issueTypeText}" oninput="updateRemainingAmount(${borrowItem.amount}, ${item.type === 'chemical' ? 2 : 0})"></div>
+          <div class="info-box" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-color: #f59e0b;"><p id="remainingInfo">💡 จำนวนที่เหลือสำหรับคืน: <span id="remainingAmount">${borrowItem.amount}</span> ${item.unit}</p></div>
+          <div class="form-group"><label for="issueNote">หมายเหตุ/รายละเอียดปัญหา</label><textarea id="issueNote" rows="3" placeholder="อธิบายปัญหาที่พบ..."></textarea></div>
+          <button type="submit" class="btn btn-danger" data-original-text="${buttonText}">${buttonText}</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+  
+    window.updateRemainingAmount = (originalAmount, decimals) => {
+        const issueAmount = parseFloat(document.getElementById('issueAmount').value) || 0;
+        const remaining = Math.max(0, originalAmount - issueAmount);
+        document.getElementById('remainingAmount').textContent = remaining.toFixed(decimals);
+    };
+
+    document.getElementById('reportIssueForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังแจ้ง...';
+      const issueAmount = parseFloat(document.getElementById('issueAmount').value);
+      const note = document.getElementById('issueNote').value;
+      const remainingAmount = Math.max(0, borrowItem.amount - issueAmount);
+      
+      if (issueAmount > borrowItem.amount) {
+          showErrorMessage('จำนวนที่แจ้งปัญหามากกว่าจำนวนที่ยืม');
+          submitBtn.disabled = false;
+          submitBtn.textContent = buttonText;
+          return;
+      }
+
+      const issueReport = {
+        id: 'issue-' + Date.now(),
+        type: 'issue_report',
+        itemId: item.__backendId,
+        itemName: item.name,
+        itemType: item.type,
+        issueType: item.type === 'chemical' ? 'out_of_stock' : 'damaged',
+        reportedBy: currentUser.username,
+        reportDate: new Date().toISOString(),
+        borrowId: borrowItem.__backendId,
+        originalAmount: borrowItem.amount,
+        [item.type === 'chemical' ? 'outOfStockAmount' : 'damagedAmount']: issueAmount,
+        note: note,
+        status: 'reported',
+        createdAt: new Date().toISOString()
+      };
+
+      const updatedBorrow = {
+        ...borrowItem,
+        amount: remainingAmount,
+        issueReported: true,
+        issueAmount: issueAmount,
+        issueNote: note
+      };
+
+      callApi('create', issueReport)
+        .then(response => {
+          if (!response.success) return onFailure(new Error('Failed to create issue report'));
+          // ✅ อัพเดทหน้าจอทันที
+          onCrudSuccess(response);
+          updateItem(updatedBorrow);
+        })
+        .catch(onFailure);
+    });
+  }
+
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการแก้ไขการยืม
+  function editBorrow(item) {
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>แก้ไขการยืม</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="editBorrowForm">
+          <div class="form-group"><label>รายการที่ยืม</label><input type="text" value="${item.itemName}" disabled></div>
+          <div class="form-group"><label for="editAmount">จำนวนที่ยืม *</label><input type="number" id="editAmount" value="${item.amount}" required min="0.01" step="any"></div>
+          <div class="form-group"><label for="editRoom">ห้องที่ใช้งาน *</label><input type="text" id="editRoom" value="${item.room}" required></div>
+          <div class="form-group"><label>วันที่ยืม</label><input type="text" value="${new Date(item.borrowDate).toLocaleString('th-TH')}" disabled></div>
+          <button type="submit" class="btn btn-primary" data-original-text="บันทึกการแก้ไข">บันทึกการแก้ไข</button>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('editBorrowForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const newAmount = parseFloat(document.getElementById('editAmount').value);
+      const originalAmount = item.amount;
+      const difference = newAmount - originalAmount;
+      const updatedBorrow = {
+        ...item,
+        amount: newAmount,
+        room: document.getElementById('editRoom').value
+      };
+      if (difference === 0) {
+        updateItem(updatedBorrow);
+        return;
+      }
+      const currentItem = allData.find(i => i.__backendId === item.itemId);
+      if (!currentItem) {
+          showErrorMessage('ไม่พบรายการต้นฉบับในสต็อก');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'บันทึกการแก้ไข';
+          return;
+      }
+      if (difference > 0 && currentItem.quantity < difference) {
+        showErrorMessage('จำนวนคงเหลือไม่เพียงพอสำหรับการเพิ่มจำนวนยืม');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'บันทึกการแก้ไข';
+        return;
+      }
+      const updatedItem = {
+        ...currentItem,
+        quantity: currentItem.quantity - difference 
+      };
+
+      callApi('update', updatedItem)
+        .then(response => {
+            if (!response.success) return onFailure(new Error('Failed to update item stock'));
+            // ✅ อัพเดทหน้าจอทันที
+            onCrudSuccess(response);
+            updateItem(updatedBorrow);
+        })
+        .catch(onFailure);
+    });
+  }
+
+  // ✅ แก้ไข: อัพเดทเรียลไทม์เมื่อมีการคืน
+  function returnItem(borrow) {
+    const item = allData.find(i => i.__backendId === borrow.itemId);
+    if (!item) return;
+
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>คืนรายการ: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="returnForm">
+          <div class="info-box"><p>📋 จำนวนที่ยืม: ${borrow.amount} ${item.unit}</p></div>
+          <div class="form-group"><label for="returnAmount">จำนวนที่คืน *</label><input type="number" id="returnAmount" value="${borrow.amount}" required min="0" max="${borrow.amount}" step="any" placeholder="จำนวนที่คืน"></div>
+          <div class="form-group"><label for="returnNote">หมายเหตุการคืน</label><textarea id="returnNote" rows="2" placeholder="บันทึกเพิ่มเติม (ถ้ามี)..."></textarea></div>
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+            <button type="submit" class="btn btn-success" data-original-text="คืนรายการ">คืนรายการ</button>
+          </div>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('returnForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const returnAmount = parseFloat(document.getElementById('returnAmount').value);
+      const returnNote = document.getElementById('returnNote').value;
+      const updatedBorrow = {
+        ...borrow,
+        returnDate: new Date().toISOString(),
+        status: 'returned',
+        actualReturnAmount: returnAmount,
+        returnNote: returnNote
+      };
+      const updatedItem = {
+        ...item,
+        quantity: item.quantity + returnAmount
+      };
+
+      callApi('update', updatedBorrow)
+        .then(response => {
+            if (!response.success) return onFailure(new Error('Failed to update borrow record'));
+            // ✅ อัพเดทหน้าจอทันที
+            onCrudSuccess(response);
+            updateItem(updatedItem);
+        })
+        .catch(onFailure);
+    });
+  }
+
+  function showErrorMessage(message) {
+    const existingError = document.querySelector('.error-toast');
+    if(existingError) document.body.removeChild(existingError);
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message error-toast';
+    errorDiv.textContent = `❌ ${message}`;
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '20px';
+    errorDiv.style.right = '20px';
+    errorDiv.style.zIndex = '9999';
+    errorDiv.style.maxWidth = '300px';
+    errorDiv.style.boxShadow = '0 10px 20px rgba(0,0,0,0.1)';
+    document.body.appendChild(errorDiv);
+    setTimeout(() => {
+      if (errorDiv.parentNode && errorDiv.parentNode === document.body) {
+        document.body.removeChild(errorDiv);
+      }
+    }, 5000);
+  }
+
+  function filterRows(tableId, searchTerm) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+      let found = false;
+      for (let row of rows) {
+          if (row.classList.contains('empty-state')) continue;
+          const text = row.textContent.toLowerCase(); 
+          if (text.includes(searchTerm)) {
+              row.style.display = '';
+              found = true;
+          } else {
+              row.style.display = 'none';
+          }
+      }
+      const emptyStateRow = table.querySelector('.empty-state');
+      if (emptyStateRow) {
+          emptyStateRow.style.display = found ? 'none' : 'table-row';
+      }
+  }
+
+  function filterByName(tableId, inputId) {
+      const searchTerm = document.getElementById(inputId).value.toLowerCase();
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+      let found = false;
+      for (let row of rows) {
+          if (row.classList.contains('empty-state')) continue;
+          const cell = row.getElementsByTagName('td')[0]; 
+          const text = cell ? cell.textContent.toLowerCase() : '';
+          if (text.includes(searchTerm)) {
+              row.style.display = '';
+              found = true;
+          } else {
+              row.style.display = 'none';
+          }
+      }
+      const emptyStateRow = table.querySelector('.empty-state');
+      if (emptyStateRow) emptyStateRow.style.display = found ? 'none' : 'table-row';
+  }
+
+  function filterReports() {
+    const searchTerm = document.getElementById('reportSearch').value.toLowerCase();
+    const container = document.getElementById('reportAccordionContainer');
+    if (!container) return;
+    const cards = container.querySelectorAll('.report-group-card');
+    let found = false;
+    for (let card of cards) {
+      const text = card.textContent.toLowerCase(); 
+      if (text.includes(searchTerm)) {
+        card.style.display = '';
+        found = true;
+      } else {
+        card.style.display = 'none';
+      }
+    }
+    const emptyState = container.querySelector('.empty-state');
+    if(emptyState) {
+        emptyState.style.display = found ? 'none' : 'block';
+    }
+  }
+
+  function filterChemicals() { filterByName('chemicalsTable', 'chemicalSearch'); }
+  function filterEquipment() { filterByName('equipmentTable', 'equipmentSearch'); }
+  function filterTeacherChemicals() { filterByName('teacherChemicalsTable', 'chemicalSearchTeacher'); }
+  function filterTeacherEquipment() { filterByName('teacherEquipmentTable', 'equipmentSearchTeacher'); }
+  
+  function resolveChemicalIssue(report, item) {
+    if (!report || !item) {
+        showErrorMessage('ไม่พบข้อมูลรายงานหรือรายการ');
+        return;
+    }
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>เติมสต็อกสารเคมี: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="restockForm">
+          <div class="info-box"><p>📋 ครูที่แจ้ง: ${report.reportedBy} | วันที่แจ้ง: ${new Date(report.reportDate).toLocaleDateString('th-TH')}</p></div>
+          <div class="form-group"><label for="restockAmount">จำนวนที่เติม *</label><input type="number" id="restockAmount" required min="0.01" step="0.01" placeholder="0.00"></div>
+          <div class="form-group"><label for="restockNote">หมายเหตุการเติมสต็อก</label><textarea id="restockNote" rows="2" placeholder="บันทึกการเติมสต็อก..."></textarea></div>
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+            <button type="submit" class="btn btn-success" data-original-text="เติมสต็อก">เติมสต็อก</button>
+          </div>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('restockForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const restockAmount = parseFloat(document.getElementById('restockAmount').value);
+      const restockNote = document.getElementById('restockNote').value;
+      const updatedItem = {
+        ...item,
+        quantity: item.quantity + restockAmount
+      };
+      const resolvedReport = {
+        ...report,
+        status: 'resolved',
+        resolvedDate: new Date().toISOString(),
+        resolvedNote: restockNote,
+        restockAmount: restockAmount
+      };
+      
+      callApi('update', updatedItem)
+        .then(response => {
+            if (!response.success) return onFailure(new Error('Failed to update item stock'));
+            updateItem(resolvedReport);
+        })
+        .catch(onFailure);
+    });
+  }
+
+  function markIssueResolved(report) {
+    if (!report) return;
+    const resolvedReport = {
+      ...report,
+      status: 'resolved',
+      resolvedDate: new Date().toISOString()
+    };
+    updateItem(resolvedReport);
+  }
+
+  function resolveEquipmentIssue(report, item) {
+    if (!report || !item) {
+        showErrorMessage('ไม่พบข้อมูลรายงานหรือรายการ');
+        return;
+    }
+    const damagedAmount = report.damagedAmount || 0;
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>ซ่อมแซมอุปกรณ์: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <form id="repairForm">
+          <div class="info-box"><p>📋 ครูที่แจ้ง: ${report.reportedBy} | จำนวนชำรุด: ${damagedAmount} ${item.unit}</p></div>
+          <div class="form-group"><label for="repairedAmount">จำนวนที่ซ่อมได้ *</label><input type="number" id="repairedAmount" required min="0" max="${damagedAmount}" step="1" value="${damagedAmount}"></div>
+          <div class="form-group"><label for="repairNote">หมายเหตุการซ่อมแซม</label><textarea id="repairNote" rows="2" placeholder="บันทึกการซ่อมแซม..."></textarea></div>
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+            <button type="submit" class="btn btn-success" data-original-text="ซ่อมเสร็จ">ซ่อมเสร็จ</button>
+          </div>
+        </form>
+      </div>
+    `;
+    modalElement.classList.add('active');
+
+    document.getElementById('repairForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+      const repairedAmount = parseFloat(document.getElementById('repairedAmount').value);
+      const repairNote = document.getElementById('repairNote').value;
+      const updatedItem = {
+        ...item,
+        quantity: item.quantity + repairedAmount,
+        damagedQuantity: Math.max(0, (item.damagedQuantity || 0) - repairedAmount)
+      };
+      if (updatedItem.damagedQuantity === 0) {
+        updatedItem.status = 'normal';
+        updatedItem.damageNote = '';
+      }
+      const resolvedReport = {
+        ...report,
+        status: 'resolved',
+        resolvedDate: new Date().toISOString(),
+        resolvedNote: repairNote,
+        repairedAmount: repairedAmount
+      };
+      
+      callApi('update', updatedItem)
+        .then(response => {
+            if (!response.success) return onFailure(new Error('Failed to update item stock'));
+            updateItem(resolvedReport);
+        })
+        .catch(onFailure);
+    });
+  }
+  
+  function viewEquipmentDetails(itemId) {
+    const item = allData.find(i => i.__backendId === itemId);
+    if (!item) return;
+    const damageReports = allData.filter(report => report.type === 'issue_report' && report.itemId === itemId && report.issueType === 'damaged' && report.status !== 'resolved');
+    const totalReportedDamage = damageReports.reduce((sum, report) => sum + (report.damagedAmount || 0), 0);
+    if(!modalElement) modalElement = document.getElementById('modal');
+    modalElement.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header"><h3>รายละเอียดอุปกรณ์: ${item.name}</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+        <div style="padding: 20px 0;">
+          <div class="info-box" style="margin-bottom: 16px;"><p><strong>จำนวนทั้งหมด (ในระบบ):</strong> ${item.quantity + totalReportedDamage} ${item.unit}</p></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;"><div><label>จำนวนใช้งานได้:</label><div style="font-size: 18px; font-weight: 600; color: #059669;">${item.quantity} ${item.unit}</div></div><div><label>จำนวนชำรุด (รอซ่อม):</label><div style="font-size: 18px; font-weight: 600; color: #dc2626;">${totalReportedDamage} ${item.unit}</div></div></div>
+          ${damageReports.length > 0 ? `<div style="margin-bottom: 20px;"><label style="font-weight: 600; margin-bottom: 8px; display: block;">รายการแจ้งชำรุด:</label><div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; max-height: 150px; overflow-y: auto;">${damageReports.map(report => `<div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #fed7d7;"><div style="font-size: 14px;"><strong>ครูที่แจ้ง:</strong> ${report.reportedBy} | <strong>วันที่:</strong> ${new Date(report.reportDate).toLocaleDateString('th-TH')} | <strong>จำนวน:</strong> <span style="color: #dc2626; font-weight: 600;">${report.damagedAmount} ${item.unit}</span></div>${report.note ? `<div style="font-size: 13px; color: #6b7280; margin-top: 4px;"><strong>หมายเหตุ:</strong> ${report.note}</div>` : ''}</div>`).join('')}</div></div>` : ''}
+          <div style="margin-bottom: 16px;"><label>สถานที่เก็บ:</label><div>${item.location}</div></div>
+          <div style="margin-bottom: 16px;"><label>สต็อกขั้นต่ำ:</label><div>${item.minStock || 0} ${item.unit}</div></div>
+        </div>
+        <div style="text-align: center;"><button class="btn btn-secondary" onclick="closeModal()">ปิด</button></div>
+      </div>
+    `;
+    modalElement.classList.add('active');
+  }
+
+  function downloadBorrowReport(format) {
+    const borrows = allData.filter(item => item.type === 'borrow');
+    borrows.sort((a, b) => (a.borrower || '').localeCompare(b.borrower || ''));
+    const title = 'รายงานการยืม-คืน';
+    const filename = `รายงานการยืม-คืน_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}`;
+    const reportData = borrows.map(item => ({ 'ผู้ยืม': item.borrower, 'รายการ': item.itemName, 'ประเภท': item.itemType === 'chemical' ? 'สารเคมี' : 'อุปกรณ์', 'จำนวน': item.amount, 'ห้อง': item.room, 'วันที่ยืม': new Date(item.borrowDate).toLocaleDateString('th-TH'), 'วันที่คืน': item.returnDate ? new Date(item.returnDate).toLocaleDateString('th-TH') : '-', 'สถานะ': item.status === 'returned' ? 'คืนแล้ว' : 'ยังไม่คืน' }));
+    const headers = ['ผู้ยืม', 'รายการ', 'ประเภท', 'จำนวน', 'ห้อง', 'วันที่ยืม', 'วันที่คืน', 'สถานะ'];
+    if (reportData.length === 0) {
+        showErrorMessage('ไม่มีข้อมูลสำหรับดาวน์โหลด');
+        return;
+    }
+    if (format === 'excel') {
+        downloadExcel(reportData, filename);
+    } else if (format === 'pdf') {
+        downloadPDF(reportData, title, filename, headers); 
+    }
+  }
 
   function downloadInventoryReport(type, format) {
     const chemicals = allData.filter(item => item.type === 'chemical');
@@ -780,41 +2055,7 @@
         downloadExcel(reportData, filename);
     } else if (format === 'pdf') {
         downloadPDF(reportData, title, filename, headers); 
-    } else if (format === 'doc') {
-        // [เพิ่ม] เรียกฟังก์ชัน Download Doc
-        downloadDoc(reportData, title, filename, headers);
     }
-  }
-
-  // --- [เพิ่ม] ฟังก์ชันดาวน์โหลด Word ---
-  function downloadDoc(data, title, filename, headers) {
-    let html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>${title}</title>
-    <style>body{font-family:'Sarabun',sans-serif;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #000;padding:8px;text-align:left;}</style>
-    </head><body><h2 style="text-align:center">${defaultConfig.system_title}</h2><h3 style="text-align:center">${title}</h3>
-    <table><thead><tr>`;
-    
-    headers.forEach(h => html += `<th style="background:#e0e0e0">${h}</th>`);
-    html += `</tr></thead><tbody>`;
-    
-    data.forEach(row => {
-        html += `<tr>`;
-        headers.forEach(h => html += `<td>${row[h]}</td>`);
-        html += `</tr>`;
-    });
-    
-    html += `</tbody></table></body></html>`;
-    
-    const blob = new Blob(['\ufeff', html], {
-        type: 'application/msword'
-    });
-    
-    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-    const link = document.createElement("a");
-    document.body.appendChild(link);
-    if(navigator.msSaveOrOpenBlob ){ navigator.msSaveOrOpenBlob( blob, `${filename}.doc`); }
-    else { link.href = url; link.download = `${filename}.doc`; link.click(); }
-    document.body.removeChild(link);
   }
 
   function downloadExcel(data, filename) {
@@ -867,6 +2108,7 @@
       .catch(error => { printWindow.close(); onFailure(error); });
   }
 
+  // ✅ ฟังก์ชันแสดง Welcome Popup
   function showWelcomeToast(name, role) {
     const existingToast = document.querySelector('.welcome-toast');
     if (existingToast) existingToast.remove();
