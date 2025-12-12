@@ -487,22 +487,34 @@
   }
   
   function onLoginSuccess(response) {
+    // 1. คืนค่าปุ่มให้เป็นปกติ
     if(loginButtonElement) {
       loginButtonElement.disabled = false;
       loginButtonElement.textContent = 'เข้าสู่ระบบ';
     }
+
     if (response.success && response.user) {
+      // 2. ตั้งค่าผู้ใช้ปัจจุบัน
       currentUser = response.user;
+      
       const displayName = (`${currentUser.firstName || ''} ${currentUser.lastName || ''}`).trim();
       currentUser.displayName = displayName || currentUser.username; 
       
       currentView = currentUser.role === 'admin' ? 'admin' : 'teacher';
       currentTab = 'dashboard';
       
-      appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังโหลดข้อมูล...</h2><p>ยินดีต้อนรับ, ${currentUser.displayName}</p></div></div>`;
-      
-      callApi('sync').then(onLoginSyncSuccess).catch(onFailure);
+      // 3. [จุดสำคัญที่แก้] ไม่ต้องโหลดใหม่! ใช้ข้อมูลที่มีอยู่แล้ว (allData) วาดหน้าจอเลย
+      if (allData && allData.length > 0) {
+        console.log('⚡ Instant Login: Using existing data');
+        renderDashboard(); // <--- วาดหน้าจอทันที เร็วปรู๊ด!
+      } else {
+        // (เผื่อไว้กรณีสุดวิสัยจริงๆ ที่ไม่มีข้อมูลเลย ค่อยโหลด)
+        appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังเตรียมข้อมูล...</h2></div></div>`;
+        callApi('sync').then(onLoginSyncSuccess).catch(onFailure);
+      }
+
     } else {
+      // กรณี Login ไม่ผ่าน
       if(loginErrorElement) {
         loginErrorElement.innerHTML =
           '<div class="error-message">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</div>';
