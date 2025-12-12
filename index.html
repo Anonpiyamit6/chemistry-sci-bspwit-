@@ -547,6 +547,7 @@
   }
   
   function onLoginSuccess(response) {
+    // คืนค่าปุ่ม
     if(loginButtonElement) {
       loginButtonElement.disabled = false;
       loginButtonElement.textContent = 'เข้าสู่ระบบ';
@@ -561,20 +562,20 @@
       currentView = currentUser.role === 'admin' ? 'admin' : 'teacher';
       currentTab = 'dashboard';
       
-      if (allData && allData.length > 0) {
-        console.log('⚡ Instant Login');
-        renderDashboard();
-        
-        // ✨✨ [เพิ่มบรรทัดนี้] แสดง Popup ต้อนรับสวยๆ ✨✨
-        showWelcomeToast(currentUser.displayName, currentUser.role);
+      // ✅ 1. แสดงป๊อปอัพต้อนรับ "ทันที" (ไม่ต้องรออะไรทั้งนั้น)
+      showWelcomeToast(currentUser.displayName, currentUser.role);
 
+      // ✅ 2. วาดหน้า Dashboard "ทันที"
+      if (allData && allData.length > 0) {
+        renderDashboard();
       } else {
+        // กรณีสุดวิสัยจริงๆ (เช่น เพิ่งเคลียร์ cache มา) ค่อยขึ้นโหลด
         appElement.innerHTML = `<div class="login-container"><div class="login-box" style="text-align: center;"><h2>กำลังเตรียมข้อมูล...</h2></div></div>`;
         callApi('sync').then(res => {
-             onLoginSyncSuccess(res);
-             // ถ้าต้องโหลดใหม่ ก็ให้แสดง Popup หลังจากโหลดเสร็จด้วย
-             if(res.success) {
-                 showWelcomeToast(currentUser.displayName, currentUser.role);
+             if(res.success && res.data) {
+                 allData = res.data;
+                 localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
+                 renderDashboard();
              }
         }).catch(onFailure);
       }
@@ -1130,7 +1131,8 @@
     currentUser = null;
     currentView = 'login';
     currentTab = 'dashboard';
-    allData = []; 
+    // allData = [];  <-- ลบบรรทัดนี้ทิ้ง หรือใส่ // ไว้ข้างหน้าครับ
+    // เราจะเก็บข้อมูลไว้ในหน่วยความจำ เพื่อให้คนต่อไปล็อคอินได้ทันทีไม่ต้องโหลดใหม่
     renderLogin();
   }
   
