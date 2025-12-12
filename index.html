@@ -242,34 +242,26 @@
 
   
   function onCrudSuccess(response) {
-    if (!response.success) {
-      const specificError = response.message || 'CRUD operation failed';
-      showErrorMessage(specificError); 
-      onFailure(new Error(specificError));
-      return;
-    }
-    
+    // ... (โค้ดเดิมช่วงตรวจสอบ success) ...
+    if (!response.success) { /* ... */ return; }
+
     console.log('CRUD Success:', response.action);
     
+    // ... (โค้ดเดิมที่จัดการ allData.push หรือ allData[index] = ...) ...
     if (response.action === 'create') {
       allData.push(response.data);
-    } 
-    else if (response.action === 'update') {
+    } else if (response.action === 'update') {
+      // ... (Logic เดิม) ...
       const index = allData.findIndex(i => i.__backendId === response.data.__backendId);
-      if (index > -1) {
-        allData[index] = response.data; 
-        if (currentUser && currentUser.__backendId === response.data.__backendId) {
-          console.log('Current user was updated, refreshing displayName...');
-          const displayName = (`${response.data.firstName || ''} ${response.data.lastName || ''}`).trim();
-          currentUser.displayName = displayName || response.data.username;
-        }
-      } else {
-        allData.push(response.data);
-      }
-    } 
-    else if (response.action === 'delete') {
+      if (index > -1) allData[index] = response.data;
+      else allData.push(response.data);
+      // ...
+    } else if (response.action === 'delete') {
       allData = allData.filter(i => i.__backendId !== response.id);
     }
+    
+    // [เพิ่มบรรทัดนี้] อัปเดตข้อมูลในเครื่องทันที
+    localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
     
     closeModal();
     renderDashboard(); 
@@ -290,6 +282,9 @@
       } else {
         allData.push(response.item);
       }
+
+      // [เพิ่มบรรทัดนี้] อัปเดตข้อมูลในเครื่องทันที
+      localStorage.setItem('smartlab_local_data', JSON.stringify(allData));
 
       closeModal();
       currentTab = 'borrow';
